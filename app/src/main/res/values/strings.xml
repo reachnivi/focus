@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Focus</string>
+    <string name="accessibility_label">Focus blocker</string>
+    <string name="accessibility_summary">Pauses the apps and websites you chose to block.</string>
+    <string name="accessibility_description">Focus uses this to see which app or website is open, so it can pause the ones you chose to block. Nothing you see or type is stored or sent anywhere. Everything stays on your phone.</string>
+</resources>
