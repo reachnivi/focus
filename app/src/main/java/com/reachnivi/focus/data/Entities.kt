@@ -9,7 +9,7 @@ import java.time.DayOfWeek
 @Entity(tableName = "block_targets", indices = [Index(value = ["type", "value"], unique = true)])
 data class BlockTargetEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    /** [TYPE_APP] or [TYPE_DOMAIN] */
+    /** [TYPE_APP], [TYPE_DOMAIN] or [TYPE_PAUSE] */
     val type: String,
     /** package name or bare domain */
     val value: String,
@@ -18,6 +18,7 @@ data class BlockTargetEntity(
     companion object {
         const val TYPE_APP = "app"
         const val TYPE_DOMAIN = "domain"
+        const val TYPE_PAUSE = "pause"
     }
 }
 
@@ -85,3 +86,20 @@ data class DailySummaryEntity(
     val totalMs: Long,
     val unlocks: Int,
 )
+
+/** One decision on the mindful-pause screen. */
+@Entity(tableName = "pause_events")
+data class PauseEventEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val packageName: String,
+    val at: Long,
+    /** [OPENED] or [SKIPPED] */
+    val outcome: String,
+    /** Minutes granted when opened, 0 when skipped. */
+    val minutes: Int,
+) {
+    companion object {
+        const val OPENED = "OPENED"
+        const val SKIPPED = "SKIPPED"
+    }
+}

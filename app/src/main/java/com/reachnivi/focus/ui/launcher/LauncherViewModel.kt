@@ -6,6 +6,7 @@ import com.reachnivi.focus.AppContainer
 import com.reachnivi.focus.block.TemporaryPasses
 import com.reachnivi.focus.core.BlockDecision
 import com.reachnivi.focus.core.BlockPolicyEngine
+import com.reachnivi.focus.core.BlockReason
 import com.reachnivi.focus.core.DayUsage
 import com.reachnivi.focus.data.InstalledApp
 import com.reachnivi.focus.data.SettingsRepository
@@ -51,7 +52,9 @@ class LauncherViewModel(private val container: AppContainer) : ViewModel() {
                     HomeApp(
                         packageName = pkg,
                         label = container.catalog.label(pkg),
+                        // A mindful pause is allowed with friction, so it isn't shown as locked.
                         pausedNow = decision is BlockDecision.Block &&
+                            decision.reason != BlockReason.MINDFUL_PAUSE &&
                             !TemporaryPasses.isActive(TemporaryPasses.appKey(pkg)),
                     )
                 },

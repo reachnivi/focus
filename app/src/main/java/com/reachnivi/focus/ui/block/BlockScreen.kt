@@ -62,13 +62,15 @@ private val prompts = listOf(
 )
 
 private const val WAIT_SECONDS = 10
+private const val PAUSE_SECONDS = 5
+private val pauseChoices = listOf(5, 10, 15)
 
 @Composable
 fun BlockScreen(
     args: BlockActivity.Args,
     container: AppContainer,
     onClose: () -> Unit,
-    onPass: () -> Unit,
+    onPass: (minutes: Int) -> Unit,
 ) {
     androidx.compose.runtime.CompositionLocalProvider(LocalAppContainer provides container) {
         BlockContent(args, container, onClose, onPass)
@@ -76,14 +78,15 @@ fun BlockScreen(
 }
 
 @Composable
-private fun BlockContent(args: BlockActivity.Args, container: AppContainer, onClose: () -> Unit, onPass: () -> Unit) {
+private fun BlockContent(args: BlockActivity.Args, container: AppContainer, onClose: () -> Unit, onPass: (Int) -> Unit) {
+    val isPause = args.reason == BlockReason.MINDFUL_PAUSE
     val settings by container.settings.settings.collectAsStateWithLifecycle(initialValue = null)
     val isSite = args.target is BlockActivity.Target.Site
     val name = if (isSite) args.target.id else container.catalog.label(args.target.id)
     val prompt = remember(args) { prompts.random() }
     val canPass = !args.strict && settings?.allowPass == true
 
-    var secondsLeft by remember(args) { mutableIntStateOf(WAIT_SECONDS) }
+    var secondsLeft by remember(args) { mutableIntStateOf(if (isPause) PAUSE_SECONDS else WAIT_SECONDS) }
     LaunchedEffect(args) {
         while (secondsLeft > 0) {
             delay(1_000)
@@ -160,35 +163,65 @@ private fun BlockContent(args: BlockActivity.Args, container: AppContainer, onCl
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.weight(1f))
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp)) {
-                    Text(if (isSite) "Leave $name" else "Close $name")
-                }
-                when {
-                    args.strict -> Row {
-                        Icon(Icons.Rounded.Lock, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Spacer(Modifier.size(6.dp))
-                        Text(
-                            "Strict focus: this can't be skipped",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+            if (isPause) {
+                PauseChoices(secondsLeft = secondsLeft, onOpen = onPass, onNotNow = onClose)
+            } else {
+                Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(onClick = onClose, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                        Text(if (isSite) "Leave $name" else "Close $name")
                     }
-                    canPass -> OutlinedButton(
-                        onClick = onPass,
-                        enabled = secondsLeft == 0,
-                        modifier = Modifier.fillMaxWidth().height(52.dp),
-                    ) {
-                        Text(
-                            if (secondsLeft > 0) {
-                                "Wait ${secondsLeft}s for ${TemporaryPasses.PASS_MINUTES} more minutes"
-                            } else {
-                                "Use ${TemporaryPasses.PASS_MINUTES} more minutes"
-                            },
-                        )
+                    when {
+                        args.strict -> Row {
+                            Icon(Icons.Rounded.Lock, null, Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.size(6.dp))
+                            Text(
+                                "Strict focus: this can't be skipped",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        canPass -> OutlinedButton(
+                            onClick = { onPass(TemporaryPasses.PASS_MINUTES) },
+                            enabled = secondsLeft == 0,
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                        ) {
+                            Text(
+                                if (secondsLeft > 0) {
+                                    "Wait ${secondsLeft}s for ${TemporaryPasses.PASS_MINUTES} more minutes"
+                                } else {
+                                    "Use ${TemporaryPasses.PASS_MINUTES} more minutes"
+                                },
+                            )
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+/** Mindful pause: the choice is real, it just arrives after a few breaths. */
+@Composable
+private fun PauseChoices(secondsLeft: Int, onOpen: (Int) -> Unit, onNotNow: () -> Unit) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            if (secondsLeft > 0) "Take ${secondsLeft} more breath${if (secondsLeft == 1) "" else "s"}…" else "Still want it? Open for",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            pauseChoices.forEach { minutes ->
+                OutlinedButton(
+                    onClick = { onOpen(minutes) },
+                    enabled = secondsLeft == 0,
+                    modifier = Modifier.weight(1f).height(52.dp),
+                ) { Text("$minutes min") }
+            }
+        }
+        Button(onClick = onNotNow, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+            Text("Not now")
         }
     }
 }
@@ -207,6 +240,7 @@ private fun headline(reason: BlockReason, name: String) = when (reason) {
     BlockReason.SCHEDULE -> "$name is resting right now"
     BlockReason.ALWAYS_ON -> "You chose to pause $name"
     BlockReason.DAILY_LIMIT -> "That's today's time for $name"
+    BlockReason.MINDFUL_PAUSE -> "A moment before $name"
 }
 
 private fun detail(args: BlockActivity.Args): String {
@@ -219,5 +253,6 @@ private fun detail(args: BlockActivity.Args): String {
         BlockReason.SCHEDULE -> "Your schedule keeps it paused until $until."
         BlockReason.ALWAYS_ON -> "It's on your block list. Change that anytime in Focus."
         BlockReason.DAILY_LIMIT -> "Your daily limit is used up. It resets at midnight."
+        BlockReason.MINDFUL_PAUSE -> "You asked Focus to pause here. Is opening it what you want right now?"
     }
 }

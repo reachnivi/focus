@@ -46,7 +46,7 @@ import com.reachnivi.focus.ui.components.AppIcon
 import kotlin.math.roundToInt
 
 @Composable
-fun AppPickerScreen(forLimit: Boolean, onBack: () -> Unit) {
+fun AppPickerScreen(forLimit: Boolean, onBack: () -> Unit, forPause: Boolean = false) {
     val vm = blockViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
     val installed by vm.installed.collectAsStateWithLifecycle()
@@ -54,13 +54,21 @@ fun AppPickerScreen(forLimit: Boolean, onBack: () -> Unit) {
     var limitFor by remember { mutableStateOf<InstalledApp?>(null) }
     LaunchedEffect(Unit) { vm.loadInstalled() }
 
-    val blocked = state.apps.toSet()
+    val blocked = if (forPause) state.pausedApps.toSet() else state.apps.toSet()
+    val pauseMode = forPause
     val limits = state.limits.associate { it.packageName to it.minutesPerDay }
 
     Column(Modifier.fillMaxSize()) {
         Row(Modifier.padding(start = 4.dp, end = 16.dp, top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back") }
-            Text(if (forLimit) "Set a daily limit" else "Choose apps to block", style = MaterialTheme.typography.titleLarge)
+            Text(
+                when {
+                    forLimit -> "Set a daily limit"
+                    forPause -> "Pause before opening"
+                    else -> "Choose apps to block"
+                },
+                style = MaterialTheme.typography.titleLarge,
+            )
         }
         OutlinedTextField(
             value = query,
@@ -82,13 +90,13 @@ fun AppPickerScreen(forLimit: Boolean, onBack: () -> Unit) {
                 if (distracting.isNotEmpty()) {
                     item { GroupLabel("Often distracting") }
                     items(distracting, key = { "d" + it.packageName }) { app ->
-                        AppRow(app, forLimit, blocked, limits, state.locked, vm) { limitFor = app }
+                        AppRow(app, forLimit, blocked, limits, state.locked && !pauseMode, vm, pauseMode) { limitFor = app }
                     }
                 }
                 if (others.isNotEmpty()) {
                     item { GroupLabel(if (distracting.isEmpty()) "Apps" else "Everything else") }
                     items(others, key = { "o" + it.packageName }) { app ->
-                        AppRow(app, forLimit, blocked, limits, state.locked, vm) { limitFor = app }
+                        AppRow(app, forLimit, blocked, limits, state.locked && !pauseMode, vm, pauseMode) { limitFor = app }
                     }
                 }
             }
@@ -134,10 +142,17 @@ private fun AppRow(
     limits: Map<String, Int>,
     locked: Boolean,
     vm: BlockViewModel,
+    pauseMode: Boolean,
     onLimit: () -> Unit,
 ) {
     val isBlocked = app.packageName in blocked
-    val toggle = { if (!(locked && isBlocked)) vm.setAppBlocked(app.packageName, !isBlocked) }
+    val toggle = {
+        if (pauseMode) {
+            vm.setAppPaused(app.packageName, !isBlocked)
+        } else if (!(locked && isBlocked)) {
+            vm.setAppBlocked(app.packageName, !isBlocked)
+        }
+    }
     Row(
         Modifier
             .fillMaxWidth()

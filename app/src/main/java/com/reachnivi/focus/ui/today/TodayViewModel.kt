@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.reachnivi.focus.AppContainer
 import com.reachnivi.focus.core.ActiveSession
 import com.reachnivi.focus.core.DayUsage
+import com.reachnivi.focus.data.PauseEventEntity
 import com.reachnivi.focus.permissions.Permissions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +30,9 @@ data class TodayUiState(
     val goalMinutes: Int = 180,
     val focusedMsToday: Long = 0,
     val session: ActiveSession? = null,
+    /** Mindful pauses shown today, and how many ended with "Not now". */
+    val pausesToday: Int = 0,
+    val letGoToday: Int = 0,
 ) {
     val goalMs: Long get() = goalMinutes * 60_000L
 }
@@ -49,7 +53,8 @@ class TodayViewModel(private val container: AppContainer, private val appContext
         data,
         container.settings.settings,
         container.sessions.sessionsSince(startOfToday),
-    ) { d, settings, sessions ->
+        container.pauseLog.since(startOfToday),
+    ) { d, settings, sessions, pauses ->
         val now = System.currentTimeMillis()
         TodayUiState(
             loading = d.loading,
@@ -61,6 +66,8 @@ class TodayViewModel(private val container: AppContainer, private val appContext
             goalMinutes = settings.dailyGoalMinutes,
             focusedMsToday = sessions.sumOf { it.focusedMs(now).coerceAtLeast(0) },
             session = settings.session?.takeIf { it.isRunning(now) },
+            pausesToday = pauses.size,
+            letGoToday = pauses.count { it.outcome == PauseEventEntity.SKIPPED },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
 
