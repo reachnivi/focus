@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.telecom.TelecomManager
 import android.util.LruCache
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -39,6 +40,8 @@ class AppCatalog(private val context: Context) {
             add("com.android.phone")
             add("com.android.emergency")
             addAll(homePackages())
+            // The phone's own dialer (com.android.contacts on realme), so calls are never blocked.
+            runCatching { context.getSystemService(TelecomManager::class.java)?.defaultDialerPackage }.getOrNull()?.let(::add)
         }
     }
 

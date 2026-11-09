@@ -103,3 +103,32 @@ data class PauseEventEntity(
         const val SKIPPED = "SKIPPED"
     }
 }
+
+/** A person in the user's inner circle for the Connection challenge. */
+@Entity(tableName = "circle_people")
+data class CirclePersonEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val phone: String,
+    val everyDays: Int,
+    val addedAt: Long = System.currentTimeMillis(),
+)
+
+/** One Connection challenge: a call attempt and how it went. */
+@Entity(tableName = "connection_events")
+data class ConnectionEventEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val personId: Long,
+    val startedAt: Long,
+    val talkedSec: Int,
+    /** True when talk time was measured by the phone, false when the user self-reported. */
+    val verified: Boolean,
+    /** COMPLETED, SHORT, NO_CALL or SKIPPED */
+    val outcome: String,
+    /** 1 (low) to 5 (great), or null if not given. */
+    val mood: Int? = null,
+    val note: String? = null,
+    /** TODAY, PAUSE, BLOCK or CIRCLE: where the challenge was started. */
+    val source: String,
+    val xp: Int = 0,
+)

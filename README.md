@@ -47,19 +47,23 @@ Open the project in Android Studio (Ladybug or newer) and run the `app` configur
 
 ## Roadmap
 
+Focus's niche is **"earn it in real life"**: real-world actions (talking to people, moving, studying) earn screen time. The launch audience is Indian students and exam aspirants.
+
 1. ✅ **Stage 1: Personal use.** Blocking (apps, sites, schedules, limits), focus sessions, screen-time dashboard, blocker health alerts
 2. **Stage 2: Minimalism**
    - ✅ 2a Minimal home screen (launcher)
-   - 2b Mindful pause: a breathing pause before opening chosen apps
+   - ✅ 2b Mindful pause: a breathing pause before opening chosen apps
    - 2c Bedtime and wind-down: nightly block list, Do Not Disturb, reminder
    - 2d Streaks, goals, weekly recap and a home-screen widget
-3. **Stage 3: Competitive essentials** (what AppBlock, Opal, ScreenZen, StayFree and BlockSite users expect)
-   - 3a Block only Reels and Shorts inside Instagram and YouTube, keeping the rest of the app
-   - 3b Hardened strict mode: uninstall protection, guarded Accessibility and App info pages, friction to disable
-   - 3c Mute notifications from blocked apps, with a digest afterwards
-   - 3d Quick-settings tile, Pomodoro cycles, presets (Work, Study, Sleep)
-   - 3e Open-count limits and category limits
-   - 3f Keyword and adult-content blocking
-   - 3g Backup and export, Hindi and regional languages
-4. **Stage 4: Insights.** Opt-in backend, accounts and sync, AI weekly insights (Claude, proxied server-side)
-5. **Stage 5: Play Store launch.** Free vs Pro, billing, onboarding with a personal plan, Accessibility declaration, privacy policy, release signing, store listing, crash reporting
+3. **Stage 3: Earn it in real life (the niche)**
+   - 3a Connection challenge: call someone from your inner circle instead of scrolling, verified on the phone
+   - 3b Walk quests: earn minutes with steps
+   - 3c AI photo quests: sky, a tree, your study desk, a book page (checked on the phone)
+   - 3d Move to unlock: pushups and squats counted by the camera
+   - 3e Phone stack: a group session with friends nearby; first to unlock buys the chai
+   - 3f Study-quiz unlock: NEET/JEE/UPSC questions earn minutes
+   - 3g QR/NFC unlock and friend-code lock
+   - 3h Focus garden: XP from every challenge grows a garden
+4. **Stage 4: Competitive essentials.** Reels/Shorts blocking, hardened strict mode, notification muting, presets and Wi-Fi triggers, open-count limits, keyword/VPN filtering, Hindi
+5. **Stage 5: Social and AI.** Backend and accounts, friend leagues, parent/mentor mode, AI coach and insights (Claude, server-side), AI conversation starters
+6. **Stage 6: Launch for Indian students.** Rupee pricing (Free, Pro, Pro + AI, institutes), aspirant onboarding, Play declarations, privacy policy, release signing, store listing, campus ambassadors

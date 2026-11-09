@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Button
@@ -44,6 +45,7 @@ import com.reachnivi.focus.AppContainer
 import com.reachnivi.focus.block.BlockActivity
 import com.reachnivi.focus.block.TemporaryPasses
 import com.reachnivi.focus.core.BlockReason
+import com.reachnivi.focus.data.CirclePersonEntity
 import com.reachnivi.focus.ui.components.AppIcon
 import com.reachnivi.focus.ui.components.LocalAppContainer
 import kotlinx.coroutines.delay
@@ -71,14 +73,24 @@ fun BlockScreen(
     container: AppContainer,
     onClose: () -> Unit,
     onPass: (minutes: Int) -> Unit,
+    onCallInstead: (CirclePersonEntity) -> Unit = {},
 ) {
     androidx.compose.runtime.CompositionLocalProvider(LocalAppContainer provides container) {
-        BlockContent(args, container, onClose, onPass)
+        BlockContent(args, container, onClose, onPass, onCallInstead)
     }
 }
 
 @Composable
-private fun BlockContent(args: BlockActivity.Args, container: AppContainer, onClose: () -> Unit, onPass: (Int) -> Unit) {
+private fun BlockContent(
+    args: BlockActivity.Args,
+    container: AppContainer,
+    onClose: () -> Unit,
+    onPass: (Int) -> Unit,
+    onCallInstead: (CirclePersonEntity) -> Unit,
+) {
+    val connection by container.connections.summary.collectAsStateWithLifecycle(initialValue = null)
+    val circle by container.connections.circle.collectAsStateWithLifecycle(initialValue = emptyList())
+    val callSuggestion = connection?.next?.let { n -> circle.firstOrNull { it.id == n.person.id } }
     val isPause = args.reason == BlockReason.MINDFUL_PAUSE
     val settings by container.settings.settings.collectAsStateWithLifecycle(initialValue = null)
     val isSite = args.target is BlockActivity.Target.Site
@@ -163,6 +175,18 @@ private fun BlockContent(args: BlockActivity.Args, container: AppContainer, onCl
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.weight(1f))
+            if (callSuggestion != null) {
+                // Turn the urge into a conversation: the Connection challenge, right where the urge happens.
+                OutlinedButton(
+                    onClick = { onCallInstead(callSuggestion) },
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                ) {
+                    Icon(Icons.Rounded.Call, null, Modifier.size(18.dp))
+                    Spacer(Modifier.size(8.dp))
+                    Text("Or call ${callSuggestion.name} instead")
+                }
+                Spacer(Modifier.height(10.dp))
+            }
             if (isPause) {
                 PauseChoices(secondsLeft = secondsLeft, onOpen = onPass, onNotNow = onClose)
             } else {
