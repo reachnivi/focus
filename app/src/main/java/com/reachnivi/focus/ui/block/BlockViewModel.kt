@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 data class BlockUiState(
     val apps: List<String> = emptyList(),
+    val pausedApps: List<String> = emptyList(),
     val domains: List<String> = emptyList(),
     val schedules: List<ScheduleRule> = emptyList(),
     val limits: List<AppLimitEntity> = emptyList(),
@@ -29,14 +30,15 @@ class BlockViewModel(private val container: AppContainer) : ViewModel() {
     private val rules = container.rules
 
     val state: StateFlow<BlockUiState> = combine(
-        rules.blockedApps,
+        combine(rules.blockedApps, rules.pausedApps) { a, p -> a to p },
         rules.blockedDomains,
         rules.schedules,
         rules.limits,
         container.settings.settings,
-    ) { apps, domains, schedules, limits, s ->
+    ) { (apps, paused), domains, schedules, limits, s ->
         BlockUiState(
             apps = apps,
+            pausedApps = paused,
             domains = domains,
             schedules = schedules,
             limits = limits,
@@ -58,6 +60,12 @@ class BlockViewModel(private val container: AppContainer) : ViewModel() {
     fun setAppBlocked(pkg: String, blocked: Boolean) = launch {
         if (!blocked && state.value.locked) return@launch
         rules.setAppBlocked(pkg, blocked)
+    }
+
+    /** Pauses only add friction, so they can be added or removed even during strict focus. */
+    fun setAppPaused(pkg: String, paused: Boolean) = launch {
+        if (paused && pkg in state.value.apps && state.value.locked) return@launch // don't silently unblock
+        rules.setAppPaused(pkg, paused)
     }
 
     /** @return false when the text isn't a valid domain. */

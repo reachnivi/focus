@@ -4,6 +4,7 @@ import com.reachnivi.focus.core.DomainMatcher
 import com.reachnivi.focus.core.ScheduleRule
 import com.reachnivi.focus.data.BlockTargetEntity.Companion.TYPE_APP
 import com.reachnivi.focus.data.BlockTargetEntity.Companion.TYPE_DOMAIN
+import com.reachnivi.focus.data.BlockTargetEntity.Companion.TYPE_PAUSE
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -17,6 +18,9 @@ class RulesRepository(private val dao: FocusDao) {
     val blockedDomains: Flow<List<String>> =
         targets.map { list -> list.filter { it.type == TYPE_DOMAIN }.map { it.value } }
 
+    val pausedApps: Flow<List<String>> =
+        targets.map { list -> list.filter { it.type == TYPE_PAUSE }.map { it.value } }
+
     val schedules: Flow<List<ScheduleRule>> =
         dao.observeSchedules().map { list -> list.map { it.toRule() } }
 
@@ -24,9 +28,20 @@ class RulesRepository(private val dao: FocusDao) {
 
     suspend fun setAppBlocked(packageName: String, blocked: Boolean) {
         if (blocked) {
+            dao.deleteTarget(TYPE_PAUSE, packageName) // blocked supersedes paused
             dao.insertTarget(BlockTargetEntity(type = TYPE_APP, value = packageName))
         } else {
             dao.deleteTarget(TYPE_APP, packageName)
+        }
+    }
+
+    /** An app is either blocked or paused, never both. */
+    suspend fun setAppPaused(packageName: String, paused: Boolean) {
+        if (paused) {
+            dao.deleteTarget(TYPE_APP, packageName)
+            dao.insertTarget(BlockTargetEntity(type = TYPE_PAUSE, value = packageName))
+        } else {
+            dao.deleteTarget(TYPE_PAUSE, packageName)
         }
     }
 

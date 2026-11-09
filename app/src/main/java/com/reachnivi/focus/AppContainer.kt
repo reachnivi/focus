@@ -6,6 +6,7 @@ import com.reachnivi.focus.block.SessionNotifier
 import com.reachnivi.focus.data.AppCatalog
 import com.reachnivi.focus.data.AppDatabase
 import com.reachnivi.focus.data.FocusSessionManager
+import com.reachnivi.focus.data.PauseLog
 import com.reachnivi.focus.data.PolicyRepository
 import com.reachnivi.focus.data.RulesRepository
 import com.reachnivi.focus.data.SettingsRepository
@@ -25,4 +26,5 @@ class AppContainer(context: Context, appScope: CoroutineScope) {
     val healthNotifier = HealthNotifier(appContext)
     val sessions = FocusSessionManager(db.focusDao(), settings, notifier)
     val policy = PolicyRepository(rules, settings, appScope)
+    val pauseLog = PauseLog(db.focusDao(), appScope)
 }

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.HourglassBottom
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -70,7 +71,7 @@ fun blockViewModel(): BlockViewModel {
 }
 
 @Composable
-fun BlockRulesScreen(onPickApps: () -> Unit, onPickLimitApp: () -> Unit, onFixPermissions: () -> Unit) {
+fun BlockRulesScreen(onPickApps: () -> Unit, onPickPauseApps: () -> Unit, onPickLimitApp: () -> Unit, onFixPermissions: () -> Unit) {
     val vm = blockViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
     val blocker = rememberBlockerStatus()
@@ -133,6 +134,7 @@ fun BlockRulesScreen(onPickApps: () -> Unit, onPickLimitApp: () -> Unit, onFixPe
             }
         }
         item { AppsCard(state.apps, state.locked, onPickApps, onRemove = { vm.setAppBlocked(it, false) }) }
+        item { PauseCard(state.pausedApps, onPickPauseApps, onRemove = { vm.setAppPaused(it, false) }) }
         item { WebsitesCard(state.domains, state.locked, vm) }
         item { LimitsCard(state, onPickLimitApp, onRemove = vm::removeLimit) }
         item { Spacer(Modifier.height(8.dp)) }
@@ -235,6 +237,29 @@ private fun AppsCard(apps: List<String>, locked: Boolean, onAdd: () -> Unit, onR
                 Spacer(Modifier.width(12.dp))
                 Text(catalog.label(pkg), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 RemoveButton(enabled = !locked) { onRemove(pkg) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PauseCard(apps: List<String>, onAdd: () -> Unit, onRemove: (String) -> Unit) {
+    val catalog = LocalAppContainer.current.catalog
+    FocusCard {
+        SectionHeader(
+            "Mindful pause",
+            subtitle = "Not blocked: a few breaths first, then you choose",
+            action = { AddButton(onAdd) },
+        )
+        if (apps.isEmpty()) {
+            EmptyHint(Icons.Rounded.SelfImprovement, "Nothing paused", "Good for apps you need, but open too often.")
+        }
+        apps.forEach { pkg ->
+            Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                AppIcon(pkg, size = 36.dp)
+                Spacer(Modifier.width(12.dp))
+                Text(catalog.label(pkg), Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                RemoveButton(enabled = true) { onRemove(pkg) }
             }
         }
     }

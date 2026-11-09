@@ -42,6 +42,17 @@ object Permissions {
     fun blockerStatus(context: Context): BlockerStatus =
         BlockerHealth.evaluate(isAccessibilityEnabled(context), FocusAccessibilityService.isConnected)
 
+    /** True when Focus's minimal home screen is the default launcher. */
+    fun isDefaultHome(context: Context): Boolean {
+        val home = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        val resolved = context.packageManager.resolveActivity(home, PackageManager.MATCH_DEFAULT_ONLY)
+        return resolved?.activityInfo?.packageName == context.packageName
+    }
+
+    /** System screen for choosing the default home app (works on realme/ColorOS too). */
+    fun openHomeSettings(context: Context) =
+        launch(context, Intent(Settings.ACTION_HOME_SETTINGS), Intent(Settings.ACTION_SETTINGS))
+
     fun hasNotificationPermission(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==

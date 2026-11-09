@@ -40,6 +40,26 @@
             </intent-filter>
         </activity>
 
+        <!-- Optional minimal home screen. No LAUNCHER category, so it adds no second app icon. -->
+        <activity
+            android:name=".launcher.LauncherActivity"
+            android:clearTaskOnLaunch="true"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label="Focus Home"
+            android:launchMode="singleTask"
+            android:resumeWhilePausing="true"
+            android:stateNotNeeded="true"
+            android:taskAffinity="com.reachnivi.focus.home"
+            android:theme="@style/Theme.Focus"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".block.BlockActivity"
             android:exported="false"

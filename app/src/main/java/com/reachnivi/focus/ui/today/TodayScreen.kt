@@ -203,6 +203,14 @@ private fun DayRingCard(state: TodayUiState) {
                     if ((change ?: 0) <= 0) Icons.AutoMirrored.Rounded.TrendingDown else Icons.AutoMirrored.Rounded.TrendingUp,
                 )
             }
+            if (state.pausesToday > 0) {
+                Spacer(Modifier.height(14.dp))
+                Text(
+                    "Paused ${state.pausesToday} time${if (state.pausesToday == 1) "" else "s"} today · let go ${state.letGoToday}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }

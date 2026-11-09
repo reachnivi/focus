@@ -47,7 +47,19 @@ Open the project in Android Studio (Ladybug or newer) and run the `app` configur
 
 ## Roadmap
 
-1. ✅ **Stage 1**: blocking (apps, sites, schedules, limits, focus sessions) and a screen-time dashboard
-2. Minimal launcher, grayscale and bedtime nudges, widgets, streaks
-3. Opt-in backend and AI weekly insights (Claude, proxied server-side)
-4. Play Store: billing tiers, Accessibility API disclosure, privacy policy, release signing
+1. ✅ **Stage 1: Personal use.** Blocking (apps, sites, schedules, limits), focus sessions, screen-time dashboard, blocker health alerts
+2. **Stage 2: Minimalism**
+   - ✅ 2a Minimal home screen (launcher)
+   - 2b Mindful pause: a breathing pause before opening chosen apps
+   - 2c Bedtime and wind-down: nightly block list, Do Not Disturb, reminder
+   - 2d Streaks, goals, weekly recap and a home-screen widget
+3. **Stage 3: Competitive essentials** (what AppBlock, Opal, ScreenZen, StayFree and BlockSite users expect)
+   - 3a Block only Reels and Shorts inside Instagram and YouTube, keeping the rest of the app
+   - 3b Hardened strict mode: uninstall protection, guarded Accessibility and App info pages, friction to disable
+   - 3c Mute notifications from blocked apps, with a digest afterwards
+   - 3d Quick-settings tile, Pomodoro cycles, presets (Work, Study, Sleep)
+   - 3e Open-count limits and category limits
+   - 3f Keyword and adult-content blocking
+   - 3g Backup and export, Hindi and regional languages
+4. **Stage 4: Insights.** Opt-in backend, accounts and sync, AI weekly insights (Claude, proxied server-side)
+5. **Stage 5: Play Store launch.** Free vs Pro, billing, onboarding with a personal plan, Accessibility declaration, privacy policy, release signing, store listing, crash reporting

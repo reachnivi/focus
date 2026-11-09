@@ -58,4 +58,11 @@ interface FocusDao {
 
     @Query("SELECT * FROM daily_summary WHERE date >= :fromDate ORDER BY date")
     suspend fun summariesFrom(fromDate: String): List<DailySummaryEntity>
+
+    // Mindful pause
+    @Insert
+    suspend fun insertPauseEvent(event: PauseEventEntity)
+
+    @Query("SELECT * FROM pause_events WHERE at >= :since ORDER BY at DESC")
+    fun observePauseEventsSince(since: Long): Flow<List<PauseEventEntity>>
 }

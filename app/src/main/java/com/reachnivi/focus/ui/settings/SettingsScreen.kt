@@ -1,6 +1,7 @@
 package com.reachnivi.focus.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material3.Icon
@@ -35,6 +37,10 @@ import com.reachnivi.focus.data.AppSettings
 import com.reachnivi.focus.ui.components.FocusCard
 import com.reachnivi.focus.ui.components.IconBadge
 import com.reachnivi.focus.ui.components.LocalAppContainer
+import com.reachnivi.focus.ui.components.rememberResumeTick
+import com.reachnivi.focus.permissions.Permissions
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -91,6 +97,7 @@ fun SettingsScreen(onPermissions: () -> Unit) {
                 }
             }
         }
+        item { HomeScreenCard() }
         item {
             FocusCard(onClick = onPermissions, contentPadding = 16.dp) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -125,6 +132,43 @@ fun SettingsScreen(onPermissions: () -> Unit) {
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeScreenCard() {
+    val context = LocalContext.current
+    val tick = rememberResumeTick()
+    val isHome = remember(tick) { Permissions.isDefaultHome(context) }
+    FocusCard(contentPadding = 16.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconBadge(Icons.Rounded.Home)
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Minimal home screen", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    if (isHome) {
+                        "Focus is your home screen. Swipe up there for all apps."
+                    } else {
+                        "Replace the busy app grid with the time, your day and a few apps as plain words."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        FilledTonalButton(onClick = { Permissions.openHomeSettings(context) }) {
+            Text(if (isHome) "Switch back" else "Set as home screen")
+        }
+        if (!isHome) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Pick \"Focus Home\" in the list that opens. You can switch back anytime.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

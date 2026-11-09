@@ -93,4 +93,33 @@ class BlockPolicyEngineTest {
         assertTrue(BlockPolicyEngine.decideDomain(p, "m.youtube.com", at(9, 12), zone) is BlockDecision.Block)
         assertEquals(BlockDecision.Allow, BlockPolicyEngine.decideDomain(p, "notyoutube.com", at(9, 12), zone))
     }
+
+    @Test
+    fun `mindful pause applies in every mode`() {
+        val p = PolicySnapshot(mode = BlockMode.FOCUS_ONLY, pausedApps = setOf("insta"))
+        val d = BlockPolicyEngine.decideApp(p, "insta", at(9, 12), zone) as BlockDecision.Block
+        assertEquals(BlockReason.MINDFUL_PAUSE, d.reason)
+        assertEquals(null, d.untilMillis)
+        assertEquals(BlockDecision.Allow, BlockPolicyEngine.decideApp(p, "maps", at(9, 12), zone))
+    }
+
+    @Test
+    fun `hard block outranks mindful pause`() {
+        val p = PolicySnapshot(blockedApps = setOf("insta"), pausedApps = setOf("insta"), mode = BlockMode.ALWAYS)
+        val d = BlockPolicyEngine.decideApp(p, "insta", at(9, 12), zone) as BlockDecision.Block
+        assertEquals(BlockReason.ALWAYS_ON, d.reason)
+    }
+
+    @Test
+    fun `used up limit outranks mindful pause`() {
+        val p = PolicySnapshot(
+            mode = BlockMode.FOCUS_ONLY,
+            pausedApps = setOf("yt"),
+            dailyLimitsMs = mapOf("yt" to 10 * 60_000L),
+        )
+        val d = BlockPolicyEngine.decideApp(p, "yt", at(9, 12), zone, 11 * 60_000L) as BlockDecision.Block
+        assertEquals(BlockReason.DAILY_LIMIT, d.reason)
+        val under = BlockPolicyEngine.decideApp(p, "yt", at(9, 12), zone, 5 * 60_000L) as BlockDecision.Block
+        assertEquals(BlockReason.MINDFUL_PAUSE, under.reason)
+    }
 }

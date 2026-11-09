@@ -130,6 +130,7 @@ private fun MainScaffold() {
             composable(Tab.Block.route) {
                 BlockRulesScreen(
                     onPickApps = { nav.navigate(Routes.picker("block")) },
+                    onPickPauseApps = { nav.navigate(Routes.picker("pause")) },
                     onPickLimitApp = { nav.navigate(Routes.picker("limit")) },
                     onFixPermissions = { nav.navigate(Routes.PERMISSIONS) },
                 )
@@ -141,8 +142,10 @@ private fun MainScaffold() {
                 PermissionsScreen(onDone = { nav.popBackStack() }, standalone = true)
             }
             composable(Routes.PICKER, arguments = listOf(navArgument("purpose") { type = NavType.StringType })) { entry ->
+                val purpose = entry.arguments?.getString("purpose")
                 AppPickerScreen(
-                    forLimit = entry.arguments?.getString("purpose") == "limit",
+                    forLimit = purpose == "limit",
+                    forPause = purpose == "pause",
                     onBack = { nav.popBackStack() },
                 )
             }

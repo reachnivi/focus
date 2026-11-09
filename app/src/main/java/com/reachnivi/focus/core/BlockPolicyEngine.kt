@@ -26,6 +26,10 @@ object BlockPolicyEngine {
                 strict = false,
             )
         }
+        // Softest rule last: a pause, not a wall. Applies in every mode.
+        if (packageName in policy.pausedApps) {
+            return BlockDecision.Block(BlockReason.MINDFUL_PAUSE, untilMillis = null, strict = false)
+        }
         return BlockDecision.Allow
     }
 

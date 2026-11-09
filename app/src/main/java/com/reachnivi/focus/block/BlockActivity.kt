@@ -44,7 +44,7 @@ class BlockActivity : ComponentActivity() {
             finish()
             return
         }
-        onBackPressedDispatcher.addCallback(this) { goHome() }
+        onBackPressedDispatcher.addCallback(this) { leave() }
         val container = (application as FocusApp).container
         setContent {
             FocusTheme {
@@ -52,9 +52,10 @@ class BlockActivity : ComponentActivity() {
                     BlockScreen(
                         args = a,
                         container = container,
-                        onClose = ::goHome,
-                        onPass = {
-                            TemporaryPasses.grant(a.target.key)
+                        onClose = ::leave,
+                        onPass = { minutes ->
+                            TemporaryPasses.grant(a.target.key, minutes)
+                            if (a.reason == BlockReason.MINDFUL_PAUSE) container.pauseLog.opened(a.target.id, minutes)
                             finish()
                         },
                     )
@@ -67,6 +68,15 @@ class BlockActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         parse(intent)?.let { args = it }
+    }
+
+    /** "Close", "Not now" or Back: record a let-go for mindful pauses, then go home. */
+    private fun leave() {
+        val a = args
+        if (a != null && a.reason == BlockReason.MINDFUL_PAUSE) {
+            (application as FocusApp).container.pauseLog.skipped(a.target.id)
+        }
+        goHome()
     }
 
     private fun goHome() {
