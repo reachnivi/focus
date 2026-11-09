@@ -1,6 +1,7 @@
 package com.reachnivi.focus
 
 import android.content.Context
+import com.reachnivi.focus.block.HealthNotifier
 import com.reachnivi.focus.block.SessionNotifier
 import com.reachnivi.focus.data.AppCatalog
 import com.reachnivi.focus.data.AppDatabase
@@ -21,6 +22,7 @@ class AppContainer(context: Context, appScope: CoroutineScope) {
     val catalog = AppCatalog(appContext)
     val usage = UsageRepository(appContext, db.focusDao(), catalog)
     val notifier = SessionNotifier(appContext)
+    val healthNotifier = HealthNotifier(appContext)
     val sessions = FocusSessionManager(db.focusDao(), settings, notifier)
     val policy = PolicyRepository(rules, settings, appScope)
 }

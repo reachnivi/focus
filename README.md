@@ -11,17 +11,21 @@ Everything runs on the phone. No accounts, no network calls.
 
 ## Install on your phone (realme Narzo 60 / any Android 8+)
 
-1. Open this repo's **Actions** tab → the latest green **Android build** run → download **focus-debug-apk**.
-2. Unzip it and open `focus-xxxxxxx.apk` on the phone. Allow installing from your browser or file manager when asked.
-3. Open **Focus** and follow the setup screens:
+**Download:** [focus.apk (latest)](https://github.com/reachnivi/focus/releases/latest/download/focus.apk). Open this link on the phone; you don't need a GitHub account.
+
+1. Tap the downloaded `focus.apk`. If Android says it can't install unknown apps from this source, tap **Settings → Allow from this source**, go back and tap **Install** (on realme, choose **Install anyway** if a security check appears).
+2. Open **Focus** and follow the setup screens:
    - **Usage access**: pick *Focus* and switch it on.
    - **Accessibility**: Android 13+ blocks this for apps installed outside the Play Store. If it's greyed out:
      *Settings → Apps → Focus → ⋮ (top right) → **Allow restricted settings***, then go back and enable it under
      *Settings → Additional settings → Accessibility → Downloaded apps → **Focus blocker***.
    - **Run in background**: allow, so realme's battery manager doesn't kill the blocker.
    - **Auto launch**: turn on for Focus (realme: *Settings → Apps → Auto launch*).
+3. The Today screen shows **Blocker on** when everything works. If the blocker stops, Focus says so there and in a notification.
 
-Every CI build uses the same committed debug key, so a newer APK installs over the old one and keeps your data.
+To update, download the link again and install over the old version; your settings and history stay.
+Each merge to `main` publishes a new [release](https://github.com/reachnivi/focus/releases). Builds from other
+branches are in the **Actions** tab as zipped `focus-debug-apk` artifacts (sign in to GitHub to download).
 
 ## Develop
 

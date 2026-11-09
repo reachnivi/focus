@@ -14,6 +14,8 @@ import android.os.Process
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.reachnivi.focus.block.FocusAccessibilityService
+import com.reachnivi.focus.core.BlockerHealth
+import com.reachnivi.focus.core.BlockerStatus
 
 object Permissions {
 
@@ -36,6 +38,9 @@ object Permissions {
         val ours = ComponentName(context, FocusAccessibilityService::class.java)
         return enabled.split(':').any { ComponentName.unflattenFromString(it) == ours }
     }
+
+    fun blockerStatus(context: Context): BlockerStatus =
+        BlockerHealth.evaluate(isAccessibilityEnabled(context), FocusAccessibilityService.isConnected)
 
     fun hasNotificationPermission(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
