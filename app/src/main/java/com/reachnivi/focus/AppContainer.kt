@@ -1,6 +1,7 @@
 package com.reachnivi.focus
 
 import android.content.Context
+import com.reachnivi.focus.block.BedtimeController
 import com.reachnivi.focus.block.ConnectionNotifier
 import com.reachnivi.focus.block.HealthNotifier
 import com.reachnivi.focus.block.SessionNotifier
@@ -28,6 +29,7 @@ class AppContainer(context: Context, appScope: CoroutineScope) {
     val notifier = SessionNotifier(appContext)
     val healthNotifier = HealthNotifier(appContext)
     val connectionNotifier = ConnectionNotifier(appContext)
+    val bedtime = BedtimeController(appContext, settings)
     val sessions = FocusSessionManager(db.focusDao(), settings, notifier)
     val policy = PolicyRepository(rules, settings, appScope)
     val pauseLog = PauseLog(db.focusDao(), appScope)

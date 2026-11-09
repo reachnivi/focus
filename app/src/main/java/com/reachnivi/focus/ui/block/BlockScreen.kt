@@ -265,6 +265,7 @@ private fun headline(reason: BlockReason, name: String) = when (reason) {
     BlockReason.ALWAYS_ON -> "You chose to pause $name"
     BlockReason.DAILY_LIMIT -> "That's today's time for $name"
     BlockReason.MINDFUL_PAUSE -> "A moment before $name"
+    BlockReason.BEDTIME -> "It's bedtime"
 }
 
 private fun detail(args: BlockActivity.Args): String {
@@ -278,5 +279,6 @@ private fun detail(args: BlockActivity.Args): String {
         BlockReason.ALWAYS_ON -> "It's on your block list. Change that anytime in Focus."
         BlockReason.DAILY_LIMIT -> "Your daily limit is used up. It resets at midnight."
         BlockReason.MINDFUL_PAUSE -> "You asked Focus to pause here. Is opening it what you want right now?"
+        BlockReason.BEDTIME -> "Your phone can rest too. Distracting apps are back at $until."
     }
 }

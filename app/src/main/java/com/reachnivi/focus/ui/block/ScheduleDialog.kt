@@ -124,7 +124,7 @@ private fun TimeField(label: String, minute: Int, modifier: Modifier, onClick: (
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TimePickerDialog(initialMinute: Int, onDismiss: () -> Unit, onConfirm: (Int) -> Unit) {
+internal fun TimePickerDialog(initialMinute: Int, onDismiss: () -> Unit, onConfirm: (Int) -> Unit) {
     val context = LocalContext.current
     val state = rememberTimePickerState(
         initialHour = initialMinute / 60,

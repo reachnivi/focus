@@ -71,6 +71,7 @@ class FocusAccessibilityService : AccessibilityService() {
             while (isActive) {
                 delay(TICK_MS)
                 recheckForeground()
+                runCatching { c.bedtime.tick() }
             }
         }
     }

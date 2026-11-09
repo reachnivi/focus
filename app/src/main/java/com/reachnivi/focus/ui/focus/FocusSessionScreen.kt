@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Bedtime
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Add
@@ -49,7 +51,7 @@ import java.time.format.FormatStyle
 private val presets = listOf(15, 25, 45, 60, 90)
 
 @Composable
-fun FocusSessionScreen(onEditBlockList: () -> Unit) {
+fun FocusSessionScreen(onEditBlockList: () -> Unit, onBedtime: () -> Unit = {}) {
     val container = LocalAppContainer.current
     val vm: FocusViewModel = viewModel { FocusViewModel(container) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -73,6 +75,7 @@ fun FocusSessionScreen(onEditBlockList: () -> Unit) {
             }
         }
         item { TodaySummary(state) }
+        item { BedtimeCard(onBedtime) }
     }
 }
 
@@ -187,3 +190,28 @@ private fun TodaySummary(state: FocusUiState) {
 }
 
 private fun plural(n: Int, word: String) = if (n == 1) "1 $word" else "$n ${word}s"
+
+@Composable
+private fun BedtimeCard(onClick: () -> Unit) {
+    val settings by LocalAppContainer.current.settings.settings.collectAsStateWithLifecycle(initialValue = null)
+    val s = settings ?: return
+    FocusCard(onClick = onClick, contentPadding = 16.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.Bedtime, null, tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Bedtime", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    if (s.bedtimeEnabled) {
+                        "Every night ${Format.minuteOfDay(s.bedtimeStart)} to ${Format.minuteOfDay(s.bedtimeEnd)}"
+                    } else {
+                        "Let your phone rest at night too"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
+        }
+    }
+}
