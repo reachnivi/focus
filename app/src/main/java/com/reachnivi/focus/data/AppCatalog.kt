@@ -47,13 +47,19 @@ class AppCatalog(private val context: Context) {
             .map { it.activityInfo.packageName }
             .toSet()
 
-    suspend fun launchableApps(): List<InstalledApp> = withContext(Dispatchers.IO) {
+    /** Apps the user may block: everything launchable except [protectedPackages]. */
+    suspend fun launchableApps(): List<InstalledApp> = queryLaunchable(includeProtected = false)
+
+    /** Every launchable app, including Phone, Settings and Focus itself (for the home screen). */
+    suspend fun allLaunchableApps(): List<InstalledApp> = queryLaunchable(includeProtected = true)
+
+    private suspend fun queryLaunchable(includeProtected: Boolean): List<InstalledApp> = withContext(Dispatchers.IO) {
         val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
         pm.queryIntentActivities(intent, 0)
             .asSequence()
             .map { it.activityInfo.applicationInfo }
             .distinctBy { it.packageName }
-            .filter { it.packageName !in protectedPackages }
+            .filter { includeProtected || it.packageName !in protectedPackages }
             .map { info ->
                 val label = info.loadLabel(pm).toString()
                 labels[info.packageName] = label
@@ -62,6 +68,19 @@ class AppCatalog(private val context: Context) {
             .sortedBy { it.label.lowercase() }
             .toList()
     }
+
+    /** Opens an app's main screen. Returns false if it can't be launched (e.g. uninstalled). */
+    fun launch(packageName: String): Boolean {
+        val intent = pm.getLaunchIntentForPackage(packageName) ?: return false
+        return try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun isInstalled(packageName: String): Boolean = pm.getLaunchIntentForPackage(packageName) != null
 
     fun label(packageName: String): String = labels.getOrPut(packageName) {
         try {

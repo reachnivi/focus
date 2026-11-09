@@ -27,6 +27,8 @@ data class AppSettings(
     val onboardingDone: Boolean = false,
     val lastFocusMinutes: Int = 25,
     val session: ActiveSession? = null,
+    /** Favourite apps on the minimal home screen, in display order. */
+    val homeApps: List<String> = emptyList(),
 )
 
 class SettingsRepository(private val context: Context) {
@@ -41,6 +43,7 @@ class SettingsRepository(private val context: Context) {
         val SESSION_START = longPreferencesKey("session_start")
         val SESSION_END = longPreferencesKey("session_end")
         val SESSION_STRICT = booleanPreferencesKey("session_strict")
+        val HOME_APPS = stringPreferencesKey("home_apps")
     }
 
     val settings: Flow<AppSettings> = context.dataStore.data
@@ -54,6 +57,7 @@ class SettingsRepository(private val context: Context) {
                 allowPass = p[Keys.ALLOW_PASS] ?: true,
                 onboardingDone = p[Keys.ONBOARDING_DONE] ?: false,
                 lastFocusMinutes = p[Keys.LAST_FOCUS_MINUTES] ?: 25,
+                homeApps = p[Keys.HOME_APPS]?.split(',')?.filter { it.isNotBlank() } ?: emptyList(),
                 session = p[Keys.SESSION_END]?.let { end ->
                     ActiveSession(
                         id = p[Keys.SESSION_ID] ?: 0L,
@@ -87,6 +91,10 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.LAST_FOCUS_MINUTES] = minutes }
     }
 
+    suspend fun setHomeApps(packages: List<String>) {
+        context.dataStore.edit { it[Keys.HOME_APPS] = packages.distinct().take(MAX_HOME_APPS).joinToString(",") }
+    }
+
     suspend fun setSession(session: ActiveSession?) {
         context.dataStore.edit { p ->
             if (session == null) {
@@ -101,5 +109,9 @@ class SettingsRepository(private val context: Context) {
                 p[Keys.SESSION_STRICT] = session.strict
             }
         }
+    }
+
+    companion object {
+        const val MAX_HOME_APPS = 7
     }
 }
