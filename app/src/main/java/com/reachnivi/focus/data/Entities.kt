@@ -132,3 +132,11 @@ data class ConnectionEventEntity(
     val source: String,
     val xp: Int = 0,
 )
+
+/** Steps walked per day, from the phone's step counter. */
+@Entity(tableName = "daily_steps")
+data class DailyStepsEntity(
+    /** ISO date, yyyy-MM-dd */
+    @PrimaryKey val date: String,
+    val steps: Int,
+)

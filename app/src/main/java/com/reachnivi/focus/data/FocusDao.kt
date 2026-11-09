@@ -96,4 +96,11 @@ interface FocusDao {
 
     @Query("SELECT * FROM daily_summary ORDER BY date")
     fun observeSummaries(): Flow<List<DailySummaryEntity>>
+
+    // Steps
+    @Upsert
+    suspend fun upsertSteps(row: DailyStepsEntity)
+
+    @Query("SELECT * FROM daily_steps ORDER BY date")
+    fun observeSteps(): Flow<List<DailyStepsEntity>>
 }

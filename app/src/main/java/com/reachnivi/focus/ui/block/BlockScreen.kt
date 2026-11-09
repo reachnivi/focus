@@ -74,9 +74,10 @@ fun BlockScreen(
     onClose: () -> Unit,
     onPass: (minutes: Int) -> Unit,
     onCallInstead: (CirclePersonEntity) -> Unit = {},
+    onWalkPass: (minutes: Int) -> Unit = {},
 ) {
     androidx.compose.runtime.CompositionLocalProvider(LocalAppContainer provides container) {
-        BlockContent(args, container, onClose, onPass, onCallInstead)
+        BlockContent(args, container, onClose, onPass, onCallInstead, onWalkPass)
     }
 }
 
@@ -87,7 +88,11 @@ private fun BlockContent(
     onClose: () -> Unit,
     onPass: (Int) -> Unit,
     onCallInstead: (CirclePersonEntity) -> Unit,
+    onWalkPass: (Int) -> Unit,
 ) {
+    val walk by container.steps.status.collectAsStateWithLifecycle(initialValue = null)
+    val walkMinutes = walk?.minutesLeft ?: 0
+    val canWalkPass = !args.strict && args.reason != BlockReason.BEDTIME && walkMinutes >= 5
     val connection by container.connections.summary.collectAsStateWithLifecycle(initialValue = null)
     val circle by container.connections.circle.collectAsStateWithLifecycle(initialValue = emptyList())
     val callSuggestion = connection?.next?.let { n -> circle.firstOrNull { it.id == n.person.id } }
@@ -125,10 +130,12 @@ private fun BlockContent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.weight(0.7f))
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(220.dp)) {
+            // Smaller breathing circle when walk minutes or a call suggestion also need room.
+            val orb = if (canWalkPass || callSuggestion != null) 150.dp else 220.dp
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(orb)) {
                 Box(
                     Modifier
-                        .size(220.dp)
+                        .size(orb)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
@@ -138,7 +145,7 @@ private fun BlockContent(
                 )
                 Box(
                     Modifier
-                        .size(150.dp)
+                        .size(orb * 0.68f)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
@@ -175,6 +182,25 @@ private fun BlockContent(
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.weight(1f))
+            if (canWalkPass) {
+                // Walk quest: minutes earned by walking can be spent here.
+                Text(
+                    "You've walked off $walkMinutes minutes today",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(Modifier.height(6.dp))
+                androidx.compose.foundation.layout.Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(5, 10, 15).filter { it <= walkMinutes }.forEach { m ->
+                        OutlinedButton(onClick = { onWalkPass(m) }, modifier = Modifier.weight(1f).height(48.dp)) {
+                            Text("Use $m min")
+                        }
+                    }
+                }
+                Spacer(Modifier.height(10.dp))
+            }
             if (callSuggestion != null) {
                 // Turn the urge into a conversation: the Connection challenge, right where the urge happens.
                 OutlinedButton(

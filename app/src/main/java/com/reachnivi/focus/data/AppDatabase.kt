@@ -18,8 +18,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PauseEventEntity::class,
         CirclePersonEntity::class,
         ConnectionEventEntity::class,
+        DailyStepsEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,8 +29,15 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "focus.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
+
+        /** v4: walk quests (steps per day). */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `daily_steps` (`date` TEXT NOT NULL, `steps` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+            }
+        }
 
         /** v3: Connection challenge (inner circle and call log). */
         val MIGRATION_2_3 = object : Migration(2, 3) {

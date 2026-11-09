@@ -59,6 +59,13 @@ class BlockActivity : ComponentActivity() {
                             if (a.reason == BlockReason.MINDFUL_PAUSE) container.pauseLog.opened(a.target.id, minutes)
                             finish()
                         },
+                        onWalkPass = { minutes ->
+                            if (container.steps.spend(minutes)) {
+                                TemporaryPasses.grant(a.target.key, minutes)
+                                if (a.reason == BlockReason.MINDFUL_PAUSE) container.pauseLog.opened(a.target.id, minutes)
+                                finish()
+                            }
+                        },
                         onCallInstead = { person ->
                             val source = if (a.reason == BlockReason.MINDFUL_PAUSE) ChallengeStore.SOURCE_PAUSE else ChallengeStore.SOURCE_BLOCK
                             if (a.reason == BlockReason.MINDFUL_PAUSE) container.pauseLog.skipped(a.target.id)

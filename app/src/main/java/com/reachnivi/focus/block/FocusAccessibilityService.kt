@@ -2,6 +2,10 @@ package com.reachnivi.focus.block
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.AudioManager
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
@@ -42,6 +46,8 @@ class FocusAccessibilityService : AccessibilityService() {
     private var lastShownKey: String? = null
     private var lastShownAt = 0L
 
+    private var stepListener: SensorEventListener? = null
+
     private var usageCache: Map<String, Long> = emptyMap()
     private var usageCacheAt = 0L
 
@@ -72,6 +78,7 @@ class FocusAccessibilityService : AccessibilityService() {
                 delay(TICK_MS)
                 recheckForeground()
                 runCatching { c.bedtime.tick() }
+                ensureStepCounting()
             }
         }
     }
@@ -102,9 +109,30 @@ class FocusAccessibilityService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        stepListener?.let { getSystemService(SensorManager::class.java)?.unregisterListener(it) }
+        stepListener = null
         isConnected = false
         scope.cancel()
         super.onDestroy()
+    }
+
+    /** Walk quests: listen to the low-power step counter once permission is granted (batched, ~5 min). */
+    private fun ensureStepCounting() {
+        val c = container ?: return
+        if (stepListener != null || !c.steps.hasPermission()) return
+        val sm = getSystemService(SensorManager::class.java) ?: return
+        val sensor = sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) ?: return
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                val reading = event.values.firstOrNull()?.toLong() ?: return
+                scope.launch { runCatching { c.steps.onReading(reading) } }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+        }
+        if (sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL, 5 * 60 * 1_000_000)) {
+            stepListener = listener
+        }
     }
 
     private fun sampleCall() {
