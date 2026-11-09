@@ -43,7 +43,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,14 +52,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.reachnivi.focus.core.BlockMode
 import com.reachnivi.focus.core.Format
 import com.reachnivi.focus.core.ScheduleRule
-import com.reachnivi.focus.permissions.Permissions
+import com.reachnivi.focus.core.BlockerStatus
+import com.reachnivi.focus.ui.components.blockerStatusHelp
+import com.reachnivi.focus.ui.components.rememberBlockerStatus
 import com.reachnivi.focus.ui.components.AppIcon
 import com.reachnivi.focus.ui.components.EmptyHint
 import com.reachnivi.focus.ui.components.FocusCard
 import com.reachnivi.focus.ui.components.IconBadge
 import com.reachnivi.focus.ui.components.LocalAppContainer
 import com.reachnivi.focus.ui.components.SectionHeader
-import com.reachnivi.focus.ui.components.rememberResumeTick
 import java.time.DayOfWeek
 
 @Composable
@@ -73,9 +73,7 @@ fun blockViewModel(): BlockViewModel {
 fun BlockRulesScreen(onPickApps: () -> Unit, onPickLimitApp: () -> Unit, onFixPermissions: () -> Unit) {
     val vm = blockViewModel()
     val state by vm.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val tick = rememberResumeTick()
-    val blockerOn = remember(tick) { Permissions.isAccessibilityEnabled(context) }
+    val blocker = rememberBlockerStatus()
     var editing by remember { mutableStateOf<ScheduleRule?>(null) }
 
     LazyColumn(
@@ -91,15 +89,18 @@ fun BlockRulesScreen(onPickApps: () -> Unit, onPickLimitApp: () -> Unit, onFixPe
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        if (!blockerOn) {
+        if (blocker != BlockerStatus.ACTIVE) {
             item {
                 FocusCard(color = MaterialTheme.colorScheme.tertiaryContainer, onClick = onFixPermissions) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         IconBadge(Icons.Rounded.WarningAmber, background = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f), tint = MaterialTheme.colorScheme.tertiary)
                         Spacer(Modifier.width(14.dp))
                         Column(Modifier.weight(1f)) {
-                            Text("Blocker is off", style = MaterialTheme.typography.titleSmall)
-                            Text("Tap to turn on the accessibility service.", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                if (blocker == BlockerStatus.OFF) "Blocker is off" else "Blocker stopped",
+                                style = MaterialTheme.typography.titleSmall,
+                            )
+                            Text(blockerStatusHelp(blocker), style = MaterialTheme.typography.bodySmall)
                         }
                     }
                 }

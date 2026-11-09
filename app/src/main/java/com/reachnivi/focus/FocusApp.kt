@@ -1,6 +1,7 @@
 package com.reachnivi.focus
 
 import android.app.Application
+import com.reachnivi.focus.usage.BlockerHealthWorker
 import com.reachnivi.focus.usage.DailySnapshotWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +17,9 @@ class FocusApp : Application() {
         super.onCreate()
         container = AppContainer(this, appScope)
         container.notifier.createChannel()
+        container.healthNotifier.createChannel()
         DailySnapshotWorker.schedule(this)
+        BlockerHealthWorker.schedule(this)
         appScope.launch { container.sessions.completeIfExpired() }
     }
 }

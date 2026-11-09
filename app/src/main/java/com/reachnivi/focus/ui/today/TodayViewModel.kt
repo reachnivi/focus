@@ -22,7 +22,6 @@ enum class Range { DAY, WEEK }
 data class TodayUiState(
     val loading: Boolean = true,
     val hasUsageAccess: Boolean = true,
-    val blockerEnabled: Boolean = true,
     val range: Range = Range.DAY,
     val today: DayUsage = DayUsage.EMPTY,
     val yesterday: DayUsage? = null,
@@ -37,7 +36,6 @@ data class TodayUiState(
 private data class UsageData(
     val loading: Boolean = true,
     val hasUsageAccess: Boolean = true,
-    val blockerEnabled: Boolean = true,
     val week: List<Pair<LocalDate, DayUsage>> = emptyList(),
     val range: Range = Range.DAY,
 )
@@ -56,7 +54,6 @@ class TodayViewModel(private val container: AppContainer, private val appContext
         TodayUiState(
             loading = d.loading,
             hasUsageAccess = d.hasUsageAccess,
-            blockerEnabled = d.blockerEnabled,
             range = d.range,
             today = d.week.lastOrNull()?.second ?: DayUsage.EMPTY,
             yesterday = d.week.getOrNull(d.week.size - 2)?.second,
@@ -70,12 +67,7 @@ class TodayViewModel(private val container: AppContainer, private val appContext
     fun refresh() {
         viewModelScope.launch {
             val hasAccess = Permissions.hasUsageAccess(appContext)
-            data.update {
-                it.copy(
-                    hasUsageAccess = hasAccess,
-                    blockerEnabled = Permissions.isAccessibilityEnabled(appContext),
-                )
-            }
+            data.update { it.copy(hasUsageAccess = hasAccess) }
             val today = LocalDate.now()
             val week = if (hasAccess) container.usage.days(today.minusDays(6), today) else emptyList()
             data.update { it.copy(loading = false, week = week) }

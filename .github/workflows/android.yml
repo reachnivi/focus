@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: write # lets builds on main publish a GitHub Release
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,14 +32,30 @@ jobs:
       - name: Build debug APK
         run: ./gradlew --no-daemon assembleDebug
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk "focus-${GITHUB_SHA::7}.apk"
+      - name: Name APKs
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk "focus-${GITHUB_SHA::7}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk focus.apk
 
       - uses: actions/upload-artifact@v4
         with:
           name: focus-debug-apk
           path: focus-*.apk
           retention-days: 30
+
+      # Every merge to main becomes the "latest" release, so this link always gets the newest APK:
+      # https://github.com/reachnivi/focus/releases/latest/download/focus.apk
+      - name: Publish release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Focus 0.1.${{ github.run_number }}
+          body: |
+            Debug build from ${{ github.sha }}.
+            Install: open focus.apk on your phone. It updates any earlier Focus build in place.
+          files: focus.apk
+          make_latest: true
 
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -1,6 +1,7 @@
 package com.reachnivi.focus.block
 
 import android.accessibilityservice.AccessibilityService
+import android.content.Intent
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
 import android.view.inputmethod.InputMethodManager
@@ -45,6 +46,8 @@ class FocusAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         val c = (application as FocusApp).container
         container = c
+        isConnected = true
+        c.healthNotifier.cancel()
         imePackages = loadImePackages()
         scope.launch {
             c.policy.snapshot.collect {
@@ -81,7 +84,13 @@ class FocusAccessibilityService : AccessibilityService() {
 
     override fun onInterrupt() = Unit
 
+    override fun onUnbind(intent: Intent?): Boolean {
+        isConnected = false
+        return super.onUnbind(intent)
+    }
+
     override fun onDestroy() {
+        isConnected = false
         scope.cancel()
         super.onDestroy()
     }
@@ -152,10 +161,15 @@ class FocusAccessibilityService : AccessibilityService() {
         getSystemService(InputMethodManager::class.java).enabledInputMethodList.map { it.packageName }.toSet()
     }.getOrDefault(emptySet())
 
-    private companion object {
-        const val SYSTEM_UI = "com.android.systemui"
-        const val TICK_MS = 15_000L
-        const val USAGE_CACHE_MS = 60_000L
-        const val REPEAT_GUARD_MS = 1_500L
+    companion object {
+        /** True while Android has this service bound. Same process as the UI, so screens can read it. */
+        @Volatile
+        var isConnected: Boolean = false
+            private set
+
+        private const val SYSTEM_UI = "com.android.systemui"
+        private const val TICK_MS = 15_000L
+        private const val USAGE_CACHE_MS = 60_000L
+        private const val REPEAT_GUARD_MS = 1_500L
     }
 }

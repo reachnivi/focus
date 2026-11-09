@@ -44,6 +44,9 @@ import com.reachnivi.focus.core.DayUsage
 import com.reachnivi.focus.core.Format
 import com.reachnivi.focus.ui.components.AppIcon
 import com.reachnivi.focus.ui.components.BarChart
+import com.reachnivi.focus.ui.components.BlockerStatusPill
+import com.reachnivi.focus.ui.components.rememberBlockerStatus
+import com.reachnivi.focus.core.BlockerStatus
 import com.reachnivi.focus.ui.components.EmptyHint
 import com.reachnivi.focus.ui.components.FocusCard
 import com.reachnivi.focus.ui.components.IconBadge
@@ -72,15 +75,16 @@ fun TodayScreen(onStartFocus: () -> Unit, onFixPermissions: () -> Unit) {
     val state by vm.state.collectAsStateWithLifecycle()
     val resumeTick = rememberResumeTick()
     LaunchedEffect(resumeTick) { vm.refresh() }
+    val blocker = rememberBlockerStatus()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { Header(state.range, vm::setRange) }
-        if (!state.hasUsageAccess || !state.blockerEnabled) {
-            item { SetupBanner(state.hasUsageAccess, state.blockerEnabled, onFixPermissions) }
+        item { Header(state.range, blocker, vm::setRange) }
+        if (!state.hasUsageAccess || blocker == BlockerStatus.OFF) {
+            item { SetupBanner(state.hasUsageAccess, blocker != BlockerStatus.OFF, onFixPermissions) }
         }
         item {
             AnimatedContent(state.range, transitionSpec = { fadeIn() togetherWith fadeOut() }, label = "range") { range ->
@@ -104,7 +108,7 @@ fun TodayScreen(onStartFocus: () -> Unit, onFixPermissions: () -> Unit) {
 }
 
 @Composable
-private fun Header(range: Range, onRange: (Range) -> Unit) {
+private fun Header(range: Range, blocker: BlockerStatus, onRange: (Range) -> Unit) {
     val hour = LocalTime.now().hour
     val greeting = when (hour) {
         in 5..11 -> "Good morning"
@@ -115,6 +119,8 @@ private fun Header(range: Range, onRange: (Range) -> Unit) {
     Column {
         Text(date, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(greeting, style = MaterialTheme.typography.headlineLarge)
+        Spacer(Modifier.height(10.dp))
+        BlockerStatusPill(blocker)
         Spacer(Modifier.height(16.dp))
         SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
             Range.entries.forEachIndexed { i, r ->
