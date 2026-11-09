@@ -50,13 +50,13 @@ Open the project in Android Studio (Ladybug or newer) and run the `app` configur
 Focus's niche is **"earn it in real life"**: real-world actions (talking to people, moving, studying) earn screen time. The launch audience is Indian students and exam aspirants.
 
 1. ✅ **Stage 1: Personal use.** Blocking (apps, sites, schedules, limits), focus sessions, screen-time dashboard, blocker health alerts
-2. **Stage 2: Minimalism**
+2. ✅ **Stage 2: Minimalism**
    - ✅ 2a Minimal home screen (launcher)
    - ✅ 2b Mindful pause: a breathing pause before opening chosen apps
-   - 2c Bedtime and wind-down: nightly block list, Do Not Disturb, reminder
-   - 2d Streaks, goals, weekly recap and a home-screen widget
+   - ✅ 2c Bedtime and wind-down: nightly block list, Do Not Disturb, reminder
+   - ✅ 2d Streaks, goals, weekly recap and a home-screen widget
 3. **Stage 3: Earn it in real life (the niche)**
-   - 3a Connection challenge: call someone from your inner circle instead of scrolling, verified on the phone
+   - ✅ 3a Connection challenge: call someone from your inner circle instead of scrolling, verified on the phone
    - 3b Walk quests: earn minutes with steps
    - 3c AI photo quests: sky, a tree, your study desk, a book page (checked on the phone)
    - 3d Move to unlock: pushups and squats counted by the camera
