@@ -39,6 +39,7 @@ import com.reachnivi.focus.ui.block.AppPickerScreen
 import com.reachnivi.focus.ui.block.BlockRulesScreen
 import com.reachnivi.focus.ui.components.LocalAppContainer
 import com.reachnivi.focus.ui.bedtime.BedtimeScreen
+import com.reachnivi.focus.ui.garden.GardenScreen
 import com.reachnivi.focus.ui.connect.AfterCallHost
 import com.reachnivi.focus.ui.connect.CircleScreen
 import com.reachnivi.focus.ui.focus.FocusSessionScreen
@@ -59,6 +60,7 @@ object Routes {
     const val PERMISSIONS = "permissions"
     const val CIRCLE = "circle"
     const val BEDTIME = "bedtime"
+    const val GARDEN = "garden"
     const val PICKER = "picker/{purpose}"
     fun picker(purpose: String) = "picker/$purpose"
 }
@@ -131,7 +133,11 @@ private fun MainScaffold() {
                     onStartFocus = { nav.navigate(Tab.Focus.route) { launchSingleTop = true } },
                     onFixPermissions = { nav.navigate(Routes.PERMISSIONS) },
                     onOpenCircle = { nav.navigate(Routes.CIRCLE) },
+                    onOpenGarden = { nav.navigate(Routes.GARDEN) },
                 )
+            }
+            composable(Routes.GARDEN) {
+                GardenScreen(onBack = { nav.popBackStack() })
             }
             composable(Routes.CIRCLE) {
                 CircleScreen(onBack = { nav.popBackStack() })

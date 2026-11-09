@@ -93,4 +93,7 @@ interface FocusDao {
 
     @Query("SELECT * FROM focus_sessions WHERE startedAt >= :since")
     suspend fun sessionsFrom(since: Long): List<FocusSessionEntity>
+
+    @Query("SELECT * FROM daily_summary ORDER BY date")
+    fun observeSummaries(): Flow<List<DailySummaryEntity>>
 }

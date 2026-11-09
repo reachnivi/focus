@@ -47,6 +47,7 @@ import com.reachnivi.focus.core.Format
 import com.reachnivi.focus.core.WeeklyRecap
 import com.reachnivi.focus.ui.components.AppIcon
 import com.reachnivi.focus.ui.connect.ConnectionCard
+import com.reachnivi.focus.ui.garden.GardenCard
 import com.reachnivi.focus.ui.components.BarChart
 import com.reachnivi.focus.ui.components.BlockerStatusPill
 import com.reachnivi.focus.ui.components.rememberBlockerStatus
@@ -72,7 +73,12 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Composable
-fun TodayScreen(onStartFocus: () -> Unit, onFixPermissions: () -> Unit, onOpenCircle: () -> Unit = {}) {
+fun TodayScreen(
+    onStartFocus: () -> Unit,
+    onFixPermissions: () -> Unit,
+    onOpenCircle: () -> Unit = {},
+    onOpenGarden: () -> Unit = {},
+) {
     val container = LocalAppContainer.current
     val appContext = LocalContext.current.applicationContext
     val vm: TodayViewModel = viewModel { TodayViewModel(container, appContext) }
@@ -97,6 +103,7 @@ fun TodayScreen(onStartFocus: () -> Unit, onFixPermissions: () -> Unit, onOpenCi
                         Range.DAY -> {
                             DayRingCard(state)
                             StreakRow(state)
+                            GardenCard(onOpenGarden)
                             HourlyCard(state.today)
                             FocusPromptCard(state, onStartFocus)
                             ConnectionCard(onOpenCircle)
