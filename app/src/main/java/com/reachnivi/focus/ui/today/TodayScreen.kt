@@ -19,7 +19,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.HourglassEmpty
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.WarningAmber
@@ -42,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.reachnivi.focus.core.DayUsage
 import com.reachnivi.focus.core.Format
+import com.reachnivi.focus.core.WeeklyRecap
 import com.reachnivi.focus.ui.components.AppIcon
 import com.reachnivi.focus.ui.connect.ConnectionCard
 import com.reachnivi.focus.ui.components.BarChart
@@ -93,6 +96,7 @@ fun TodayScreen(onStartFocus: () -> Unit, onFixPermissions: () -> Unit, onOpenCi
                     when (range) {
                         Range.DAY -> {
                             DayRingCard(state)
+                            StreakRow(state)
                             HourlyCard(state.today)
                             FocusPromptCard(state, onStartFocus)
                             ConnectionCard(onOpenCircle)
@@ -100,6 +104,7 @@ fun TodayScreen(onStartFocus: () -> Unit, onFixPermissions: () -> Unit, onOpenCi
                         }
                         Range.WEEK -> {
                             WeekCard(state)
+                            state.history?.let { RecapCard(it.recap) }
                             TopAppsCard("Most used this week", DayUsage.merge(state.week.map { it.second }), state.loading)
                         }
                     }
@@ -344,3 +349,54 @@ private fun TopAppsCard(title: String, usage: DayUsage, loading: Boolean) {
         }
     }
 }
+
+@Composable
+private fun StreakRow(state: TodayUiState) {
+    val connection by LocalAppContainer.current.connections.summary.collectAsStateWithLifecycle(initialValue = null)
+    val h = state.history ?: return
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        StatTile("Under goal", plural(h.underGoalStreak, "day"), Modifier.weight(1f), Icons.Rounded.Spa)
+        StatTile("Focus streak", plural(h.focusStreak, "day"), Modifier.weight(1f), Icons.Rounded.SelfImprovement)
+        StatTile("Connection", plural(connection?.weekStreak ?: 0, "wk"), Modifier.weight(1f), Icons.Rounded.Favorite)
+    }
+}
+
+@Composable
+private fun RecapCard(recap: WeeklyRecap) {
+    val catalog = LocalAppContainer.current.catalog
+    FocusCard {
+        SectionHeader("Last 7 days vs the 7 before")
+        Spacer(Modifier.height(8.dp))
+        val change = recap.changePercent
+        Text(
+            when {
+                change == null -> "Not enough history yet. Check back next week."
+                change < 0 -> "${-change}% less screen time"
+                change > 0 -> "$change% more screen time"
+                else -> "About the same as before"
+            },
+            style = MaterialTheme.typography.titleLarge,
+            color = if ((change ?: 0) <= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+        )
+        Text(
+            "${Format.duration(recap.thisWeekMs)} vs ${Format.duration(recap.lastWeekMs)}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        recap.bestDay?.let { day ->
+            Spacer(Modifier.height(10.dp))
+            Text(
+                "Lightest day: ${day.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())} (${Format.duration(recap.bestDayMs)})",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        recap.biggestDrop?.let { drop ->
+            Text(
+                "Biggest drop: ${catalog.label(drop.packageName)}, ${Format.duration(-drop.changeMs)} less",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+    }
+}
+
+private fun plural(n: Int, unit: String) = if (n == 1) "1 $unit" else "$n ${unit}s"

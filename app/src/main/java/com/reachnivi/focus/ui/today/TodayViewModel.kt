@@ -7,6 +7,7 @@ import com.reachnivi.focus.AppContainer
 import com.reachnivi.focus.core.ActiveSession
 import com.reachnivi.focus.core.DayUsage
 import com.reachnivi.focus.data.PauseEventEntity
+import com.reachnivi.focus.usage.HistorySummary
 import com.reachnivi.focus.permissions.Permissions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +34,7 @@ data class TodayUiState(
     /** Mindful pauses shown today, and how many ended with "Not now". */
     val pausesToday: Int = 0,
     val letGoToday: Int = 0,
+    val history: HistorySummary? = null,
 ) {
     val goalMs: Long get() = goalMinutes * 60_000L
 }
@@ -47,6 +49,7 @@ private data class UsageData(
 class TodayViewModel(private val container: AppContainer, private val appContext: Context) : ViewModel() {
 
     private val data = MutableStateFlow(UsageData())
+    private val history = MutableStateFlow<HistorySummary?>(null)
     private val startOfToday = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
     val state: StateFlow<TodayUiState> = combine(
@@ -54,7 +57,8 @@ class TodayViewModel(private val container: AppContainer, private val appContext
         container.settings.settings,
         container.sessions.sessionsSince(startOfToday),
         container.pauseLog.since(startOfToday),
-    ) { d, settings, sessions, pauses ->
+        history,
+    ) { d, settings, sessions, pauses, hist ->
         val now = System.currentTimeMillis()
         TodayUiState(
             loading = d.loading,
@@ -68,6 +72,7 @@ class TodayViewModel(private val container: AppContainer, private val appContext
             session = settings.session?.takeIf { it.isRunning(now) },
             pausesToday = pauses.size,
             letGoToday = pauses.count { it.outcome == PauseEventEntity.SKIPPED },
+            history = hist,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), TodayUiState())
 
@@ -78,6 +83,8 @@ class TodayViewModel(private val container: AppContainer, private val appContext
             val today = LocalDate.now()
             val week = if (hasAccess) container.usage.days(today.minusDays(6), today) else emptyList()
             data.update { it.copy(loading = false, week = week) }
+            history.value = runCatching { container.history.summary(container.settings.current().dailyGoalMinutes) }
+                .getOrNull() ?: history.value
         }
     }
 

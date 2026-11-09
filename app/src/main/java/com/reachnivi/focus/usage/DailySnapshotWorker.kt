@@ -20,6 +20,10 @@ class DailySnapshotWorker(context: Context, params: WorkerParameters) : Coroutin
             container.usage.snapshot(today.minusDays(1))
             container.usage.snapshot(today)
             container.sessions.completeIfExpired()
+            if (container.recap.isDue()) {
+                val goal = container.settings.current().dailyGoalMinutes
+                container.recap.send(container.history.summary(goal).recap)
+            }
         }.fold(onSuccess = { Result.success() }, onFailure = { Result.retry() })
     }
 

@@ -8,6 +8,8 @@ class FocusSessionManager(
     private val dao: FocusDao,
     private val settings: SettingsRepository,
     private val notifier: SessionNotifier,
+    /** Called after a session starts or ends (e.g. to refresh the home-screen widget). */
+    private val onChanged: suspend () -> Unit = {},
 ) {
     suspend fun start(minutes: Int, strict: Boolean) {
         val now = System.currentTimeMillis()
@@ -16,6 +18,7 @@ class FocusSessionManager(
         settings.setSession(ActiveSession(id, now, end, strict))
         settings.setLastFocusMinutes(minutes)
         notifier.show(end, strict)
+        onChanged()
     }
 
     /** Ends the running session early. Strict sessions refuse; returns false then. */
@@ -26,6 +29,7 @@ class FocusSessionManager(
         dao.endSession(s.id, minOf(now, s.endsAt))
         settings.setSession(null)
         notifier.cancel()
+        onChanged()
         return true
     }
 
@@ -36,6 +40,7 @@ class FocusSessionManager(
             dao.endSession(s.id, s.endsAt)
             settings.setSession(null)
             notifier.cancel()
+            onChanged()
         }
     }
 

@@ -14,7 +14,10 @@ import com.reachnivi.focus.data.PauseLog
 import com.reachnivi.focus.data.PolicyRepository
 import com.reachnivi.focus.data.RulesRepository
 import com.reachnivi.focus.data.SettingsRepository
+import com.reachnivi.focus.usage.HistoryRepository
+import com.reachnivi.focus.usage.RecapNotifier
 import com.reachnivi.focus.usage.UsageRepository
+import com.reachnivi.focus.widget.FocusWidget
 import kotlinx.coroutines.CoroutineScope
 
 /** Hand-rolled dependency container: small app, no DI framework needed yet. */
@@ -30,7 +33,9 @@ class AppContainer(context: Context, appScope: CoroutineScope) {
     val healthNotifier = HealthNotifier(appContext)
     val connectionNotifier = ConnectionNotifier(appContext)
     val bedtime = BedtimeController(appContext, settings)
-    val sessions = FocusSessionManager(db.focusDao(), settings, notifier)
+    val history = HistoryRepository(usage, db.focusDao())
+    val recap = RecapNotifier(appContext)
+    val sessions = FocusSessionManager(db.focusDao(), settings, notifier) { FocusWidget.refresh(appContext) }
     val policy = PolicyRepository(rules, settings, appScope)
     val pauseLog = PauseLog(db.focusDao(), appScope)
     val connections = ConnectionsRepository(appContext, db.focusDao(), ChallengeStore(appContext))

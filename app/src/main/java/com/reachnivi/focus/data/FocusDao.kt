@@ -87,4 +87,10 @@ interface FocusDao {
 
     @Query("SELECT * FROM circle_people ORDER BY addedAt")
     suspend fun getCircle(): List<CirclePersonEntity>
+
+    @Query("SELECT * FROM daily_app_usage WHERE date >= :fromDate")
+    suspend fun appUsageFrom(fromDate: String): List<DailyAppUsageEntity>
+
+    @Query("SELECT * FROM focus_sessions WHERE startedAt >= :since")
+    suspend fun sessionsFrom(since: Long): List<FocusSessionEntity>
 }
