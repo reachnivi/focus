@@ -55,13 +55,13 @@ Focus's niche is **"earn it in real life"**: real-world actions (calling people 
    - ✅ 2b Mindful pause: a breathing pause before opening chosen apps
    - ✅ 2c Bedtime and wind-down: nightly block list, Do Not Disturb, reminder
    - ✅ 2d Streaks, goals, weekly recap and a home-screen widget
-3. **Stage 3: Earn it in real life (the niche)**
+3. ✅ **Stage 3: Earn it in real life (the niche)**
    - ✅ 3a Connection challenge: call someone from your inner circle instead of scrolling, verified on the phone
    - ✅ 3b Walk quests: earn minutes with steps
    - ✅ 3c AI photo quests: sky, a tree, your study desk, a book page (checked on the phone)
    - ✅ 3d Move to unlock: pushups and squats counted by the camera
    - ✅ 3e Phone stack: a group session with friends nearby; first to unlock buys the coffee
-   - 3f QR/NFC unlock and friend-code lock
+   - ✅ 3f QR/NFC unlock and friend-code lock
    - ✅ 3g Focus garden: XP from every challenge grows a garden
 4. **Stage 4: Competitive essentials.** Reels/Shorts blocking, hardened strict mode, notification muting, presets and Wi-Fi triggers, open-count limits, keyword/VPN filtering
 5. **Stage 5: Social and AI.** Backend and accounts, friend leagues, accountability partner, AI coach and insights (Claude, server-side), AI conversation starters

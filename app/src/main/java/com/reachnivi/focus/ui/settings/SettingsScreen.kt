@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material3.Icon
@@ -46,7 +47,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun SettingsScreen(onPermissions: () -> Unit, onCircle: () -> Unit = {}) {
+fun SettingsScreen(onPermissions: () -> Unit, onCircle: () -> Unit = {}, onUnlock: () -> Unit = {}) {
     val container = LocalAppContainer.current
     val settings by container.settings.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
     val scope = rememberCoroutineScope()
@@ -106,6 +107,19 @@ fun SettingsScreen(onPermissions: () -> Unit, onCircle: () -> Unit = {}) {
                     Column(Modifier.weight(1f)) {
                         Text("Your circle", style = MaterialTheme.typography.titleSmall)
                         Text("People to call instead of scrolling", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
+                }
+            }
+        }
+        item {
+            FocusCard(onClick = onUnlock, contentPadding = 16.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconBadge(Icons.Rounded.Key)
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Ways to unlock", style = MaterialTheme.typography.titleSmall)
+                        Text("A QR code, an NFC tag, or a friend's code", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
                 }

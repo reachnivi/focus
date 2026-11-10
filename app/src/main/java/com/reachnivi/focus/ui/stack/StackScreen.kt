@@ -1,6 +1,5 @@
 package com.reachnivi.focus.ui.stack
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -46,8 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.qrcode.QRCodeWriter
 import com.reachnivi.focus.block.FocusAccessibilityService
 import com.reachnivi.focus.core.Format
 import com.reachnivi.focus.core.StackCode
@@ -57,15 +54,9 @@ import com.reachnivi.focus.stack.StackStore
 import com.reachnivi.focus.ui.components.FocusCard
 import com.reachnivi.focus.ui.components.LocalAppContainer
 import com.reachnivi.focus.ui.components.StatTile
+import com.reachnivi.focus.ui.components.qrBitmap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-private fun qrBitmap(text: String, size: Int = 640): Bitmap {
-    val matrix = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, size, size)
-    val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.RGB_565)
-    for (x in 0 until size) for (y in 0 until size) bmp.setPixel(x, y, if (matrix[x, y]) android.graphics.Color.BLACK else android.graphics.Color.WHITE)
-    return bmp
-}
 
 /** Phone stack: friends put phones face-down together; the first one picked up buys the coffee. */
 @Composable

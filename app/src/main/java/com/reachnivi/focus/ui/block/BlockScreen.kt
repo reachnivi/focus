@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,9 +76,10 @@ fun BlockScreen(
     onPass: (minutes: Int) -> Unit,
     onCallInstead: (CirclePersonEntity) -> Unit = {},
     onWalkPass: (minutes: Int) -> Unit = {},
+    onUnlockGranted: (minutes: Int) -> Unit = {},
 ) {
     androidx.compose.runtime.CompositionLocalProvider(LocalAppContainer provides container) {
-        BlockContent(args, container, onClose, onPass, onCallInstead, onWalkPass)
+        BlockContent(args, container, onClose, onPass, onCallInstead, onWalkPass, onUnlockGranted)
     }
 }
 
@@ -89,6 +91,7 @@ private fun BlockContent(
     onPass: (Int) -> Unit,
     onCallInstead: (CirclePersonEntity) -> Unit,
     onWalkPass: (Int) -> Unit,
+    onUnlockGranted: (Int) -> Unit,
 ) {
     val walk by container.steps.status.collectAsStateWithLifecycle(initialValue = null)
     val walkMinutes = walk?.minutesLeft ?: 0
@@ -201,6 +204,7 @@ private fun BlockContent(
                 }
                 Spacer(Modifier.height(10.dp))
             }
+            UnlockOptions(args, onUnlockGranted)
             if (callSuggestion != null) {
                 // Turn the urge into a conversation: the Connection challenge, right where the urge happens.
                 OutlinedButton(
@@ -306,5 +310,138 @@ private fun detail(args: BlockActivity.Args): String {
         BlockReason.DAILY_LIMIT -> "Your daily limit is used up. It resets at midnight."
         BlockReason.MINDFUL_PAUSE -> "You asked Focus to pause here. Is opening it what you want right now?"
         BlockReason.BEDTIME -> "Your phone can rest too. Distracting apps are back at $until."
+    }
+}
+
+/**
+ * "Other ways to unlock": the methods set up in Settings. QR and NFC need the user to walk to their
+ * key and aren't offered during strict focus or bedtime; a friend's code works even then.
+ */
+@Composable
+private fun UnlockOptions(args: BlockActivity.Args, onGranted: (Int) -> Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val store = LocalAppContainer.current.unlock
+    val m by store.methods.collectAsStateWithLifecycle()
+    val physicalAllowed = !args.strict && args.reason != BlockReason.BEDTIME && args.reason != BlockReason.MINDFUL_PAUSE
+    val showQr = physicalAllowed && m.qrToken != null
+    val nfc = remember { android.nfc.NfcAdapter.getDefaultAdapter(context) }
+    val showTag = physicalAllowed && m.tagHash != null && nfc != null
+    val showFriend = m.hasFriend && args.reason != BlockReason.MINDFUL_PAUSE
+    if (!showQr && !showTag && !showFriend) return
+
+    var open by remember { mutableStateOf(false) }
+    var code by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf<String?>(null) }
+
+    // While this screen shows, tapping the registered NFC tag unlocks.
+    if (showTag && open) {
+        val activity = context as? android.app.Activity
+        androidx.compose.runtime.DisposableEffect(activity) {
+            activity?.let { act ->
+                nfc!!.enableReaderMode(
+                    act,
+                    { tag ->
+                        if (store.matchesTag(tag.id)) {
+                            act.runOnUiThread { onGranted(m.unlockMinutes) }
+                        } else {
+                            act.runOnUiThread { message = "That's not your registered tag." }
+                        }
+                    },
+                    android.nfc.NfcAdapter.FLAG_READER_NFC_A or android.nfc.NfcAdapter.FLAG_READER_NFC_B or
+                        android.nfc.NfcAdapter.FLAG_READER_NFC_F or android.nfc.NfcAdapter.FLAG_READER_NFC_V,
+                    null,
+                )
+            }
+            onDispose { activity?.let { runCatching { nfc!!.disableReaderMode(it) } } }
+        }
+    }
+
+    androidx.compose.material3.TextButton(onClick = { open = !open }, modifier = Modifier.fillMaxWidth()) {
+        Text(if (open) "Hide other ways to unlock" else "Other ways to unlock")
+    }
+    androidx.compose.animation.AnimatedVisibility(open) {
+        Column(Modifier.fillMaxWidth().padding(bottom = 10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (showQr) {
+                OutlinedButton(
+                    onClick = {
+                        com.google.mlkit.vision.codescanner.GmsBarcodeScanning.getClient(context).startScan()
+                            .addOnSuccessListener { b ->
+                                if (store.matchesQr(b.rawValue)) onGranted(m.unlockMinutes) else message = "That's not your unlock code."
+                            }
+                            .addOnFailureListener { message = "Couldn't open the scanner." }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                ) { Text("Scan your unlock code") }
+            }
+            if (showTag) {
+                Text(
+                    "Or hold your NFC tag to the back of the phone.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            if (showFriend) {
+                val name = m.friendName.orEmpty()
+                val phone = m.friendPhone.orEmpty()
+                Text(
+                    if (args.strict) "Strict focus: only $name can let you out." else "Ask $name for your code.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = {
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent(android.content.Intent.ACTION_DIAL, android.net.Uri.parse("tel:" + android.net.Uri.encode(phone)))
+                                        .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Call $name") }
+                    OutlinedButton(
+                        onClick = {
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent(android.content.Intent.ACTION_SENDTO, android.net.Uri.parse("smsto:" + android.net.Uri.encode(phone)))
+                                        .putExtra("sms_body", "Hey, can you read me my Focus unlock code?")
+                                        .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                                )
+                            }
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) { Text("Text") }
+                }
+                androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = code,
+                        onValueChange = { code = it.filter(Char::isDigit).take(6) },
+                        modifier = Modifier.weight(1f),
+                        placeholder = { Text("6-digit code") },
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.NumberPassword),
+                    )
+                    Button(
+                        onClick = {
+                            when (val r = store.checkCode(code)) {
+                                com.reachnivi.focus.data.CodeResult.Ok -> onGranted(m.unlockMinutes)
+                                com.reachnivi.focus.data.CodeResult.Wrong -> message = "That code didn't work. Codes change every 30 seconds."
+                                is com.reachnivi.focus.data.CodeResult.LockedOut -> message = "Too many wrong codes. Try again in 10 minutes."
+                            }
+                            code = ""
+                        },
+                        enabled = code.length == 6,
+                    ) { Text("Unlock") }
+                }
+            }
+            message?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.tertiary, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            }
+        }
     }
 }

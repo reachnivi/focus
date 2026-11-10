@@ -57,7 +57,7 @@ import com.reachnivi.focus.ui.components.StatTile
 import kotlinx.coroutines.launch
 
 /** Opens the system contact picker for one phone number. Needs no contacts permission. */
-private class PickPhone : ActivityResultContract<Unit, Uri?>() {
+internal class PickPhone : ActivityResultContract<Unit, Uri?>() {
     override fun createIntent(context: Context, input: Unit) =
         Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
 
@@ -65,7 +65,7 @@ private class PickPhone : ActivityResultContract<Unit, Uri?>() {
         if (resultCode == Activity.RESULT_OK) intent?.data else null
 }
 
-private fun readPicked(context: Context, uri: Uri): Pair<String, String>? = runCatching {
+internal fun readPicked(context: Context, uri: Uri): Pair<String, String>? = runCatching {
     context.contentResolver.query(
         uri,
         arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER),
