@@ -21,6 +21,7 @@ class FocusApp : Application() {
         container.connectionNotifier.createChannel()
         container.bedtime.createChannel()
         container.recap.createChannel()
+        container.stack.createChannel()
         DailySnapshotWorker.schedule(this)
         BlockerHealthWorker.schedule(this)
         appScope.launch { container.sessions.completeIfExpired() }

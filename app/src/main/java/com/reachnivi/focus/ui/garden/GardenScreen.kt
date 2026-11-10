@@ -37,6 +37,7 @@ private fun howToGrow(source: GardenSource) = when (source) {
     GardenSource.UNDER_GOAL -> "End a day under your screen-time goal: 15 XP"
     GardenSource.STEPS -> "Walk: 5 XP per 1,000 steps, up to 50 a day"
     GardenSource.QUESTS -> "Do a photo quest on the Today screen: 15 XP each"
+    GardenSource.STACKS -> "Finish a phone stack with friends: 25 XP"
 }
 
 @Composable

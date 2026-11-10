@@ -17,6 +17,8 @@ import com.reachnivi.focus.data.PolicyRepository
 import com.reachnivi.focus.data.RulesRepository
 import com.reachnivi.focus.data.SettingsRepository
 import com.reachnivi.focus.data.StepStore
+import com.reachnivi.focus.stack.StackController
+import com.reachnivi.focus.stack.StackStore
 import com.reachnivi.focus.usage.HistoryRepository
 import com.reachnivi.focus.usage.RecapNotifier
 import com.reachnivi.focus.usage.UsageRepository
@@ -24,7 +26,7 @@ import com.reachnivi.focus.widget.FocusWidget
 import kotlinx.coroutines.CoroutineScope
 
 /** Hand-rolled dependency container: small app, no DI framework needed yet. */
-class AppContainer(context: Context, appScope: CoroutineScope) {
+class AppContainer(context: Context, private val appScope: CoroutineScope) {
     private val appContext = context.applicationContext
     private val db = AppDatabase.build(appContext)
 
@@ -42,6 +44,8 @@ class AppContainer(context: Context, appScope: CoroutineScope) {
     val garden = GardenRepository(db.focusDao(), settings, usage, steps.stepsByDay)
     val photoQuests = PhotoQuestRepository(db.focusDao(), steps)
     val sessions = FocusSessionManager(db.focusDao(), settings, notifier) { FocusWidget.refresh(appContext) }
+    val stackHistory = db.focusDao().observeStacks()
+    val stack = StackController(appContext, StackStore(appContext), db.focusDao(), sessions, settings, appScope)
     val policy = PolicyRepository(rules, settings, appScope)
     val pauseLog = PauseLog(db.focusDao(), appScope)
     val connections = ConnectionsRepository(appContext, db.focusDao(), ChallengeStore(appContext))

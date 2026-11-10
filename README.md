@@ -60,7 +60,7 @@ Focus's niche is **"earn it in real life"**: real-world actions (talking to peop
    - ✅ 3b Walk quests: earn minutes with steps
    - ✅ 3c AI photo quests: sky, a tree, your study desk, a book page (checked on the phone)
    - 3d Move to unlock: pushups and squats counted by the camera
-   - 3e Phone stack: a group session with friends nearby; first to unlock buys the chai
+   - ✅ 3e Phone stack: a group session with friends nearby; first to unlock buys the chai
    - 3f Study-quiz unlock: NEET/JEE/UPSC questions earn minutes
    - 3g QR/NFC unlock and friend-code lock
    - ✅ 3h Focus garden: XP from every challenge grows a garden

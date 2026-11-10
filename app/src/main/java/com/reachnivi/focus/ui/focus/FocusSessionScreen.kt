@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Bedtime
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.Add
@@ -51,7 +52,7 @@ import java.time.format.FormatStyle
 private val presets = listOf(15, 25, 45, 60, 90)
 
 @Composable
-fun FocusSessionScreen(onEditBlockList: () -> Unit, onBedtime: () -> Unit = {}) {
+fun FocusSessionScreen(onEditBlockList: () -> Unit, onBedtime: () -> Unit = {}, onStack: () -> Unit = {}) {
     val container = LocalAppContainer.current
     val vm: FocusViewModel = viewModel { FocusViewModel(container) }
     val state by vm.state.collectAsStateWithLifecycle()
@@ -75,6 +76,7 @@ fun FocusSessionScreen(onEditBlockList: () -> Unit, onBedtime: () -> Unit = {}) 
             }
         }
         item { TodaySummary(state) }
+        item { StackCard(onStack) }
         item { BedtimeCard(onBedtime) }
     }
 }
@@ -206,6 +208,30 @@ private fun BedtimeCard(onClick: () -> Unit) {
                         "Every night ${Format.minuteOfDay(s.bedtimeStart)} to ${Format.minuteOfDay(s.bedtimeEnd)}"
                     } else {
                         "Let your phone rest at night too"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
+        }
+    }
+}
+
+@Composable
+private fun StackCard(onClick: () -> Unit) {
+    val active by LocalAppContainer.current.stack.store.active.collectAsStateWithLifecycle()
+    FocusCard(onClick = onClick, contentPadding = 16.dp) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.Groups, null, tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("Phone stack", style = MaterialTheme.typography.titleSmall)
+                Text(
+                    when (active?.phase) {
+                        is com.reachnivi.focus.core.StackPhase.Running -> "In progress. Don't touch it!"
+                        is com.reachnivi.focus.core.StackPhase.Waiting -> "Waiting for phones to go face-down"
+                        else -> "Phones down with friends. First to pick up buys the chai."
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
