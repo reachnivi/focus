@@ -8,6 +8,7 @@ enum class GardenSource(val label: String) {
     FOCUS("Focus sessions"),
     UNDER_GOAL("Days under your goal"),
     STEPS("Steps walked"),
+    QUESTS("Photo quests"),
 }
 
 enum class GardenStage(val label: String, val fromLevel: Int) {
@@ -37,6 +38,7 @@ data class GardenInputs(
     val sessions: List<SessionInput> = emptyList(),
     val underGoalDays: Int = 0,
     val stepsByDay: List<Int> = emptyList(),
+    val photoQuests: Int = 0,
 )
 
 object Garden {
@@ -55,6 +57,7 @@ object Garden {
         GardenSource.FOCUS to inputs.sessions.sumOf(::sessionXp),
         GardenSource.UNDER_GOAL to inputs.underGoalDays * UNDER_GOAL_XP,
         GardenSource.STEPS to inputs.stepsByDay.sumOf(::stepsXp),
+        GardenSource.QUESTS to inputs.photoQuests * PhotoQuests.REWARD_XP,
     )
 
     fun xp(inputs: GardenInputs): Int = breakdown(inputs).values.sum()

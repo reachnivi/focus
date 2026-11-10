@@ -185,7 +185,7 @@ private fun BlockContent(
             if (canWalkPass) {
                 // Walk quest: minutes earned by walking can be spent here.
                 Text(
-                    "You've walked off $walkMinutes minutes today",
+                    "You've earned $walkMinutes minutes today",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,

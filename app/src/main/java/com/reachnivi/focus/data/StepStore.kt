@@ -23,8 +23,10 @@ data class WalkStatus(
     val earnedMinutes: Int,
     val spentMinutes: Int,
     val stepsToNext: Int?,
+    /** Minutes earned today from other quests (e.g. photo quests), on top of walking. */
+    val bonusMinutes: Int = 0,
 ) {
-    val minutesLeft: Int get() = (earnedMinutes - spentMinutes).coerceAtLeast(0)
+    val minutesLeft: Int get() = (earnedMinutes + bonusMinutes - spentMinutes).coerceAtLeast(0)
 }
 
 /** Walk quests: today's steps, minutes earned and spent. Day history goes to Room for the garden. */
@@ -33,6 +35,7 @@ class StepStore(private val context: Context, private val dao: FocusDao) {
     private val _state = MutableStateFlow(read())
     val state: StateFlow<StepState?> = _state.asStateFlow()
     private val _spent = MutableStateFlow(readSpent())
+    private val _bonus = MutableStateFlow(readBonus())
     private var lastPersistAt = 0L
 
     val hasSensor: Boolean
@@ -48,7 +51,7 @@ class StepStore(private val context: Context, private val dao: FocusDao) {
         if (live != null) stored + (live.day to live.stepsToday) else stored
     }
 
-    val status: Flow<WalkStatus> = combine(_state, _spent) { s, spent ->
+    val status: Flow<WalkStatus> = combine(_state, _spent, _bonus) { s, spent, bonus ->
         val steps = s?.takeIf { it.day == LocalDate.now() }?.stepsToday ?: 0
         WalkStatus(
             available = hasSensor,
@@ -57,6 +60,7 @@ class StepStore(private val context: Context, private val dao: FocusDao) {
             earnedMinutes = Steps.earnedMinutes(steps),
             spentMinutes = if (prefs.getString(K_SPENT_DAY, null) == LocalDate.now().toString()) spent else 0,
             stepsToNext = Steps.stepsToNextReward(steps),
+            bonusMinutes = bonus,
         )
     }
 
@@ -82,8 +86,15 @@ class StepStore(private val context: Context, private val dao: FocusDao) {
     }
 
     fun minutesLeftToday(): Int {
-        val s = _state.value?.takeIf { it.day == LocalDate.now() } ?: return 0
-        return Steps.available(s.stepsToday, readSpent())
+        val steps = _state.value?.takeIf { it.day == LocalDate.now() }?.stepsToday ?: 0
+        return (Steps.earnedMinutes(steps) + readBonus() - readSpent()).coerceAtLeast(0)
+    }
+
+    /** Adds minutes earned by a non-walking quest to today's wallet. */
+    fun addBonus(minutes: Int) {
+        val total = readBonus() + minutes
+        prefs.edit().putString(K_BONUS_DAY, LocalDate.now().toString()).putInt(K_BONUS, total).apply()
+        _bonus.value = total
     }
 
     /** @return true if [minutes] were available and are now spent. */
@@ -97,12 +108,16 @@ class StepStore(private val context: Context, private val dao: FocusDao) {
 
     fun refresh() {
         _spent.value = readSpent()
+        _bonus.value = readBonus()
     }
 
     private fun read(): StepState? {
         val day = prefs.getString(K_DAY, null)?.let { runCatching { LocalDate.parse(it) }.getOrNull() } ?: return null
         return StepState(day, prefs.getInt(K_STEPS, 0), prefs.getLong(K_READING, 0))
     }
+
+    private fun readBonus(): Int =
+        if (prefs.getString(K_BONUS_DAY, null) == LocalDate.now().toString()) prefs.getInt(K_BONUS, 0) else 0
 
     private fun readSpent(): Int =
         if (prefs.getString(K_SPENT_DAY, null) == LocalDate.now().toString()) prefs.getInt(K_SPENT, 0) else 0
@@ -113,5 +128,7 @@ class StepStore(private val context: Context, private val dao: FocusDao) {
         const val K_READING = "last_reading"
         const val K_SPENT_DAY = "spent_day"
         const val K_SPENT = "spent_minutes"
+        const val K_BONUS_DAY = "bonus_day"
+        const val K_BONUS = "bonus_minutes"
     }
 }

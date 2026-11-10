@@ -140,3 +140,15 @@ data class DailyStepsEntity(
     @PrimaryKey val date: String,
     val steps: Int,
 )
+
+/** A completed photo quest. Only the matched label is kept, never the photo. */
+@Entity(tableName = "photo_quests")
+data class PhotoQuestEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val questId: String,
+    /** ISO date, yyyy-MM-dd */
+    val date: String,
+    val completedAt: Long,
+    val label: String,
+    val confidence: Float,
+)
