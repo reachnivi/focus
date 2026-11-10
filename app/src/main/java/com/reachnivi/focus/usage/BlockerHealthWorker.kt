@@ -10,6 +10,7 @@ import com.reachnivi.focus.FocusApp
 import com.reachnivi.focus.core.BlockerHealth
 import com.reachnivi.focus.core.BlockerStatus
 import com.reachnivi.focus.permissions.Permissions
+import com.reachnivi.focus.widget.FocusWidget
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import java.util.concurrent.TimeUnit
@@ -19,6 +20,7 @@ class BlockerHealthWorker(context: Context, params: WorkerParameters) : Coroutin
 
     override suspend fun doWork(): Result {
         val container = (applicationContext as FocusApp).container
+        FocusWidget.refresh(applicationContext)
         var status = Permissions.blockerStatus(applicationContext)
         if (status == BlockerStatus.NOT_RUNNING) {
             // A freshly started process may not have re-bound the service yet; give Android a moment.

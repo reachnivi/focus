@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 /** When the block list (apps + websites) is enforced. Daily limits always apply. */
 enum class BlockMode { ALWAYS, SCHEDULED, FOCUS_ONLY }
 
-enum class BlockReason { FOCUS_SESSION, SCHEDULE, ALWAYS_ON, DAILY_LIMIT, MINDFUL_PAUSE }
+enum class BlockReason { FOCUS_SESSION, SCHEDULE, ALWAYS_ON, DAILY_LIMIT, MINDFUL_PAUSE, BEDTIME }
 
 sealed interface BlockDecision {
     data object Allow : BlockDecision
@@ -82,4 +82,6 @@ data class PolicySnapshot(
     val dailyLimitsMs: Map<String, Long> = emptyMap(),
     /** Apps that are allowed, but only after a short mindful pause. */
     val pausedApps: Set<String> = emptySet(),
+    /** Nightly window that enforces the block list whatever the mode, or null when off. */
+    val bedtime: ScheduleRule? = null,
 )

@@ -2,6 +2,11 @@ package com.reachnivi.focus.block
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.media.AudioManager
 import android.os.SystemClock
 import android.view.accessibility.AccessibilityEvent
 import android.view.inputmethod.InputMethodManager
@@ -9,6 +14,8 @@ import com.reachnivi.focus.AppContainer
 import com.reachnivi.focus.FocusApp
 import com.reachnivi.focus.core.BlockDecision
 import com.reachnivi.focus.core.BlockPolicyEngine
+import com.reachnivi.focus.core.Connections
+import com.reachnivi.focus.data.ChallengeStore
 import com.reachnivi.focus.core.DomainMatcher
 import com.reachnivi.focus.core.PolicySnapshot
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +46,8 @@ class FocusAccessibilityService : AccessibilityService() {
     private var lastShownKey: String? = null
     private var lastShownAt = 0L
 
+    private var stepListener: SensorEventListener? = null
+
     private var usageCache: Map<String, Long> = emptyMap()
     private var usageCacheAt = 0L
 
@@ -55,11 +64,21 @@ class FocusAccessibilityService : AccessibilityService() {
                 recheckForeground()
             }
         }
+        // Connection challenge: measure call time from the audio mode (no call-log permission needed).
+        scope.launch {
+            while (isActive) {
+                val active = c.connections.store.active.value != null
+                if (active) sampleCall()
+                delay(if (active) Connections.SAMPLE_INTERVAL_SEC * 1_000L else 10_000L)
+            }
+        }
         // Catch schedules starting, limits being reached or passes expiring while an app stays open.
         scope.launch {
             while (isActive) {
                 delay(TICK_MS)
                 recheckForeground()
+                runCatching { c.bedtime.tick() }
+                ensureStepCounting()
             }
         }
     }
@@ -90,9 +109,44 @@ class FocusAccessibilityService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        stepListener?.let { getSystemService(SensorManager::class.java)?.unregisterListener(it) }
+        stepListener = null
         isConnected = false
         scope.cancel()
         super.onDestroy()
+    }
+
+    /** Walk quests: listen to the low-power step counter once permission is granted (batched, ~5 min). */
+    private fun ensureStepCounting() {
+        val c = container ?: return
+        if (stepListener != null || !c.steps.hasPermission()) return
+        val sm = getSystemService(SensorManager::class.java) ?: return
+        val sensor = sm.getDefaultSensor(Sensor.TYPE_STEP_COUNTER) ?: return
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                val reading = event.values.firstOrNull()?.toLong() ?: return
+                scope.launch { runCatching { c.steps.onReading(reading) } }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+        }
+        if (sm.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_NORMAL, 5 * 60 * 1_000_000)) {
+            stepListener = listener
+        }
+    }
+
+    private fun sampleCall() {
+        val c = container ?: return
+        val challenge = c.connections.store.active.value ?: return
+        val now = System.currentTimeMillis()
+        if (now - challenge.startedAt > ChallengeStore.MAX_AGE_MS) return
+        val mode = getSystemService(AudioManager::class.java).mode
+        val inCall = mode == AudioManager.MODE_IN_CALL || mode == AudioManager.MODE_IN_COMMUNICATION
+        val talked = Connections.accumulate(challenge.talkedSec, inCall, (now - challenge.lastSampleAt) / 1_000)
+        c.connections.store.recordSample(talked, now, inCall)
+        if (challenge.inCallNow && !inCall && talked > 0) {
+            c.connectionNotifier.callEnded(challenge.personName, talked)
+        }
     }
 
     private suspend fun recheckForeground() {

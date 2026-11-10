@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.Spa
@@ -45,7 +46,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun SettingsScreen(onPermissions: () -> Unit) {
+fun SettingsScreen(onPermissions: () -> Unit, onCircle: () -> Unit = {}) {
     val container = LocalAppContainer.current
     val settings by container.settings.settings.collectAsStateWithLifecycle(initialValue = AppSettings())
     val scope = rememberCoroutineScope()
@@ -94,6 +95,19 @@ fun SettingsScreen(onPermissions: () -> Unit) {
                         checked = settings.allowPass,
                         onCheckedChange = { on -> scope.launch { container.settings.setAllowPass(on) } },
                     )
+                }
+            }
+        }
+        item {
+            FocusCard(onClick = onCircle, contentPadding = 16.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconBadge(Icons.Rounded.Favorite)
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Your circle", style = MaterialTheme.typography.titleSmall)
+                        Text("People to call instead of scrolling", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null)
                 }
             }
         }

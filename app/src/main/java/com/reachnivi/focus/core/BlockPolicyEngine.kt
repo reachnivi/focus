@@ -44,6 +44,14 @@ object BlockPolicyEngine {
         if (session != null && session.isRunning(now)) {
             return BlockDecision.Block(BlockReason.FOCUS_SESSION, session.endsAt, session.strict)
         }
+        val bedtime = policy.bedtime
+        if (bedtime != null) {
+            val t = LocalDateTime.ofInstant(Instant.ofEpochMilli(now), zone)
+            if (bedtime.isActiveAt(t)) {
+                val end = bedtime.currentWindowEnd(t).atZone(zone).toInstant().toEpochMilli()
+                return BlockDecision.Block(BlockReason.BEDTIME, end, strict = false)
+            }
+        }
         return when (policy.mode) {
             BlockMode.ALWAYS -> BlockDecision.Block(BlockReason.ALWAYS_ON, null, strict = false)
             BlockMode.FOCUS_ONLY -> null

@@ -38,6 +38,10 @@ import com.reachnivi.focus.AppContainer
 import com.reachnivi.focus.ui.block.AppPickerScreen
 import com.reachnivi.focus.ui.block.BlockRulesScreen
 import com.reachnivi.focus.ui.components.LocalAppContainer
+import com.reachnivi.focus.ui.bedtime.BedtimeScreen
+import com.reachnivi.focus.ui.garden.GardenScreen
+import com.reachnivi.focus.ui.connect.AfterCallHost
+import com.reachnivi.focus.ui.connect.CircleScreen
 import com.reachnivi.focus.ui.focus.FocusSessionScreen
 import com.reachnivi.focus.ui.onboarding.OnboardingScreen
 import com.reachnivi.focus.ui.onboarding.PermissionsScreen
@@ -54,6 +58,9 @@ private enum class Tab(val route: String, val label: String, val icon: ImageVect
 
 object Routes {
     const val PERMISSIONS = "permissions"
+    const val CIRCLE = "circle"
+    const val BEDTIME = "bedtime"
+    const val GARDEN = "garden"
     const val PICKER = "picker/{purpose}"
     fun picker(purpose: String) = "picker/$purpose"
 }
@@ -71,7 +78,10 @@ fun FocusRoot(container: AppContainer) {
             when (done) {
                 null -> Box(Modifier.fillMaxSize()) // first DataStore read, a few ms
                 false -> OnboardingScreen(onFinished = { scope.launch { container.settings.setOnboardingDone(true) } })
-                true -> MainScaffold()
+                true -> {
+                    MainScaffold()
+                    AfterCallHost()
+                }
             }
         }
     }
@@ -122,10 +132,24 @@ private fun MainScaffold() {
                 TodayScreen(
                     onStartFocus = { nav.navigate(Tab.Focus.route) { launchSingleTop = true } },
                     onFixPermissions = { nav.navigate(Routes.PERMISSIONS) },
+                    onOpenCircle = { nav.navigate(Routes.CIRCLE) },
+                    onOpenGarden = { nav.navigate(Routes.GARDEN) },
                 )
             }
+            composable(Routes.GARDEN) {
+                GardenScreen(onBack = { nav.popBackStack() })
+            }
+            composable(Routes.CIRCLE) {
+                CircleScreen(onBack = { nav.popBackStack() })
+            }
             composable(Tab.Focus.route) {
-                FocusSessionScreen(onEditBlockList = { nav.navigate(Tab.Block.route) { launchSingleTop = true } })
+                FocusSessionScreen(
+                    onEditBlockList = { nav.navigate(Tab.Block.route) { launchSingleTop = true } },
+                    onBedtime = { nav.navigate(Routes.BEDTIME) },
+                )
+            }
+            composable(Routes.BEDTIME) {
+                BedtimeScreen(onBack = { nav.popBackStack() })
             }
             composable(Tab.Block.route) {
                 BlockRulesScreen(
@@ -136,7 +160,10 @@ private fun MainScaffold() {
                 )
             }
             composable(Tab.Settings.route) {
-                SettingsScreen(onPermissions = { nav.navigate(Routes.PERMISSIONS) })
+                SettingsScreen(
+                    onPermissions = { nav.navigate(Routes.PERMISSIONS) },
+                    onCircle = { nav.navigate(Routes.CIRCLE) },
+                )
             }
             composable(Routes.PERMISSIONS) {
                 PermissionsScreen(onDone = { nav.popBackStack() }, standalone = true)

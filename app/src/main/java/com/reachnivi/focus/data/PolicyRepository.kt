@@ -37,6 +37,7 @@ class PolicyRepository(rules: RulesRepository, settings: SettingsRepository, sco
             session = s.session,
             dailyLimitsMs = limits.associate { it.packageName to it.minutesPerDay * 60_000L },
             pausedApps = paused.toSet(),
+            bedtime = s.bedtime,
         )
     }.stateIn(scope, SharingStarted.Eagerly, PolicySnapshot())
 }

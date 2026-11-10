@@ -16,8 +16,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         DailyAppUsageEntity::class,
         DailySummaryEntity::class,
         PauseEventEntity::class,
+        CirclePersonEntity::class,
+        ConnectionEventEntity::class,
+        DailyStepsEntity::class,
     ],
-    version = 2,
+    version = 4,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -26,8 +29,42 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "focus.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
+
+        /** v4: walk quests (steps per day). */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `daily_steps` (`date` TEXT NOT NULL, `steps` INTEGER NOT NULL, PRIMARY KEY(`date`))")
+            }
+        }
+
+        /** v3: Connection challenge (inner circle and call log). */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `circle_people` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`name` TEXT NOT NULL, " +
+                        "`phone` TEXT NOT NULL, " +
+                        "`everyDays` INTEGER NOT NULL, " +
+                        "`addedAt` INTEGER NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `connection_events` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`personId` INTEGER NOT NULL, " +
+                        "`startedAt` INTEGER NOT NULL, " +
+                        "`talkedSec` INTEGER NOT NULL, " +
+                        "`verified` INTEGER NOT NULL, " +
+                        "`outcome` TEXT NOT NULL, " +
+                        "`mood` INTEGER, " +
+                        "`note` TEXT, " +
+                        "`source` TEXT NOT NULL, " +
+                        "`xp` INTEGER NOT NULL)",
+                )
+            }
+        }
 
         /** v2: mindful-pause decisions. Paused apps reuse block_targets (type = 'pause'). */
         val MIGRATION_1_2 = object : Migration(1, 2) {

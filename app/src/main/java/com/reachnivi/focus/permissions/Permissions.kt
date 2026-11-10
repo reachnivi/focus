@@ -53,6 +53,13 @@ object Permissions {
     fun openHomeSettings(context: Context) =
         launch(context, Intent(Settings.ACTION_HOME_SETTINGS), Intent(Settings.ACTION_SETTINGS))
 
+    /** Needed to turn Do Not Disturb on and off at bedtime. */
+    fun hasDndAccess(context: Context): Boolean =
+        context.getSystemService(android.app.NotificationManager::class.java).isNotificationPolicyAccessGranted
+
+    fun openDndAccess(context: Context) =
+        launch(context, Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS), appDetails(context))
+
     fun hasNotificationPermission(context: Context): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==

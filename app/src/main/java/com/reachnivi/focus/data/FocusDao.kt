@@ -65,4 +65,42 @@ interface FocusDao {
 
     @Query("SELECT * FROM pause_events WHERE at >= :since ORDER BY at DESC")
     fun observePauseEventsSince(since: Long): Flow<List<PauseEventEntity>>
+
+    // Connection challenge
+    @Query("SELECT * FROM circle_people ORDER BY addedAt")
+    fun observeCircle(): Flow<List<CirclePersonEntity>>
+
+    @Insert
+    suspend fun insertPerson(person: CirclePersonEntity): Long
+
+    @Query("DELETE FROM circle_people WHERE id = :id")
+    suspend fun deletePerson(id: Long)
+
+    @Query("UPDATE circle_people SET everyDays = :everyDays WHERE id = :id")
+    suspend fun setEveryDays(id: Long, everyDays: Int)
+
+    @Insert
+    suspend fun insertConnectionEvent(event: ConnectionEventEntity)
+
+    @Query("SELECT * FROM connection_events ORDER BY startedAt DESC")
+    fun observeConnectionEvents(): Flow<List<ConnectionEventEntity>>
+
+    @Query("SELECT * FROM circle_people ORDER BY addedAt")
+    suspend fun getCircle(): List<CirclePersonEntity>
+
+    @Query("SELECT * FROM daily_app_usage WHERE date >= :fromDate")
+    suspend fun appUsageFrom(fromDate: String): List<DailyAppUsageEntity>
+
+    @Query("SELECT * FROM focus_sessions WHERE startedAt >= :since")
+    suspend fun sessionsFrom(since: Long): List<FocusSessionEntity>
+
+    @Query("SELECT * FROM daily_summary ORDER BY date")
+    fun observeSummaries(): Flow<List<DailySummaryEntity>>
+
+    // Steps
+    @Upsert
+    suspend fun upsertSteps(row: DailyStepsEntity)
+
+    @Query("SELECT * FROM daily_steps ORDER BY date")
+    fun observeSteps(): Flow<List<DailyStepsEntity>>
 }
