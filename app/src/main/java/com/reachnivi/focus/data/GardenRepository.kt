@@ -39,7 +39,7 @@ class GardenRepository(
     /** Steps per day, oldest first; empty until step counting exists. */
     steps: Flow<Map<LocalDate, Int>> = flowOf(emptyMap()),
 ) {
-    private val questDates = combine(dao.observePhotoQuests(), dao.observeStacks()) { q, st -> q to st }
+    private val questDates = combine(dao.observePhotoQuests(), dao.observeStacks(), dao.observeMoves()) { q, st, mv -> Triple(q, st, mv) }
     private val todayUsageMs = MutableStateFlow(0L)
 
     private val activity = combine(
@@ -50,7 +50,7 @@ class GardenRepository(
     ) { c, p, s, d -> Activity(c, p, s, d) }
 
     val state: Flow<GardenState> = combine(activity, settings.settings, steps, todayUsageMs, questDates) { a, s, stepsByDay, todayMs, questsAndStacks ->
-        val (quests, stacks) = questsAndStacks
+        val (quests, stacks, moves) = questsAndStacks
         val zone = ZoneId.systemDefault()
         val today = LocalDate.now(zone)
         val goalMs = s.dailyGoalMinutes * 60_000L
@@ -71,6 +71,8 @@ class GardenRepository(
                 stepsByDay = stepsByDay.filterKeys { !onlyToday || it == today }.values.toList(),
                 photoQuests = quests.count { !onlyToday || it.date == today.toString() },
                 stacksCompleted = stacks.count { it.outcome == "COMPLETED" && keep(it.endedAt) },
+                repsByDay = moves.filter { !onlyToday || it.date == today.toString() }
+                    .groupBy { it.date }.values.map { day -> day.sumOf { it.reps } },
             )
         }
 

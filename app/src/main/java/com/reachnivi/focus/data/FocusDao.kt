@@ -117,4 +117,14 @@ interface FocusDao {
 
     @Query("SELECT * FROM phone_stacks ORDER BY startedAt DESC")
     fun observeStacks(): Flow<List<PhoneStackEntity>>
+
+    // Move to unlock
+    @Insert
+    suspend fun insertMove(row: MoveSessionEntity)
+
+    @Query("SELECT * FROM move_sessions ORDER BY completedAt DESC")
+    fun observeMoves(): Flow<List<MoveSessionEntity>>
+
+    @Query("SELECT * FROM move_sessions WHERE date = :date")
+    suspend fun movesOn(date: String): List<MoveSessionEntity>
 }

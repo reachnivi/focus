@@ -77,6 +77,10 @@ dependencies {
     implementation(libs.mlkit.image.labeling)
     implementation(libs.zxing.core)
     implementation(libs.play.services.code.scanner)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    implementation(libs.mlkit.pose.detection)
     implementation(libs.kotlinx.coroutines.android)
 
     debugImplementation(libs.compose.ui.tooling)

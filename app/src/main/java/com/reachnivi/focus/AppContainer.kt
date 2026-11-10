@@ -17,6 +17,7 @@ import com.reachnivi.focus.data.PolicyRepository
 import com.reachnivi.focus.data.RulesRepository
 import com.reachnivi.focus.data.SettingsRepository
 import com.reachnivi.focus.data.StepStore
+import com.reachnivi.focus.move.MoveRepository
 import com.reachnivi.focus.stack.StackController
 import com.reachnivi.focus.stack.StackStore
 import com.reachnivi.focus.usage.HistoryRepository
@@ -43,6 +44,7 @@ class AppContainer(context: Context, private val appScope: CoroutineScope) {
     val steps = StepStore(appContext, db.focusDao())
     val garden = GardenRepository(db.focusDao(), settings, usage, steps.stepsByDay)
     val photoQuests = PhotoQuestRepository(db.focusDao(), steps)
+    val move = MoveRepository(db.focusDao(), steps)
     val sessions = FocusSessionManager(db.focusDao(), settings, notifier) { FocusWidget.refresh(appContext) }
     val stackHistory = db.focusDao().observeStacks()
     val stack = StackController(appContext, StackStore(appContext), db.focusDao(), sessions, settings, appScope)

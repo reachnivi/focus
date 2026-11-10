@@ -41,6 +41,7 @@ import com.reachnivi.focus.ui.components.LocalAppContainer
 import com.reachnivi.focus.ui.bedtime.BedtimeScreen
 import com.reachnivi.focus.ui.garden.GardenScreen
 import com.reachnivi.focus.ui.stack.StackScreen
+import com.reachnivi.focus.ui.move.MoveScreen
 import com.reachnivi.focus.ui.connect.AfterCallHost
 import com.reachnivi.focus.ui.connect.CircleScreen
 import com.reachnivi.focus.ui.focus.FocusSessionScreen
@@ -63,6 +64,7 @@ object Routes {
     const val BEDTIME = "bedtime"
     const val GARDEN = "garden"
     const val STACK = "stack"
+    const val MOVE = "move"
     const val PICKER = "picker/{purpose}"
     fun picker(purpose: String) = "picker/$purpose"
 }
@@ -136,7 +138,11 @@ private fun MainScaffold() {
                     onFixPermissions = { nav.navigate(Routes.PERMISSIONS) },
                     onOpenCircle = { nav.navigate(Routes.CIRCLE) },
                     onOpenGarden = { nav.navigate(Routes.GARDEN) },
+                    onOpenMove = { nav.navigate(Routes.MOVE) },
                 )
+            }
+            composable(Routes.MOVE) {
+                MoveScreen(onBack = { nav.popBackStack() })
             }
             composable(Routes.GARDEN) {
                 GardenScreen(onBack = { nav.popBackStack() })

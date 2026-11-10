@@ -38,6 +38,7 @@ private fun howToGrow(source: GardenSource) = when (source) {
     GardenSource.STEPS -> "Walk: 5 XP per 1,000 steps, up to 50 a day"
     GardenSource.QUESTS -> "Do a photo quest on the Today screen: 15 XP each"
     GardenSource.STACKS -> "Finish a phone stack with friends: 25 XP"
+    GardenSource.MOVE -> "Squats or pushups in Move to unlock: 1 XP per rep, up to 30 a day"
 }
 
 @Composable

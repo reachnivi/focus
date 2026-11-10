@@ -10,6 +10,7 @@ enum class GardenSource(val label: String) {
     STEPS("Steps walked"),
     QUESTS("Photo quests"),
     STACKS("Phone stacks"),
+    MOVE("Workouts"),
 }
 
 enum class GardenStage(val label: String, val fromLevel: Int) {
@@ -41,6 +42,8 @@ data class GardenInputs(
     val stepsByDay: List<Int> = emptyList(),
     val photoQuests: Int = 0,
     val stacksCompleted: Int = 0,
+    /** Reps per day from Move to unlock. */
+    val repsByDay: List<Int> = emptyList(),
 )
 
 object Garden {
@@ -62,6 +65,7 @@ object Garden {
         GardenSource.STEPS to inputs.stepsByDay.sumOf(::stepsXp),
         GardenSource.QUESTS to inputs.photoQuests * PhotoQuests.REWARD_XP,
         GardenSource.STACKS to inputs.stacksCompleted * STACK_XP,
+        GardenSource.MOVE to inputs.repsByDay.sumOf { Reps.xpForDay(it) },
     )
 
     fun xp(inputs: GardenInputs): Int = breakdown(inputs).values.sum()

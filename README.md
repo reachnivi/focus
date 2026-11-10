@@ -59,7 +59,7 @@ Focus's niche is **"earn it in real life"**: real-world actions (calling people 
    - ✅ 3a Connection challenge: call someone from your inner circle instead of scrolling, verified on the phone
    - ✅ 3b Walk quests: earn minutes with steps
    - ✅ 3c AI photo quests: sky, a tree, your study desk, a book page (checked on the phone)
-   - 3d Move to unlock: pushups and squats counted by the camera
+   - ✅ 3d Move to unlock: pushups and squats counted by the camera
    - ✅ 3e Phone stack: a group session with friends nearby; first to unlock buys the coffee
    - 3f QR/NFC unlock and friend-code lock
    - ✅ 3g Focus garden: XP from every challenge grows a garden

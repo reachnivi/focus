@@ -167,3 +167,16 @@ data class PhoneStackEntity(
     /** COMPLETED or BROKEN */
     val outcome: String,
 )
+
+/** A Move-to-unlock workout: reps counted on the phone by pose detection. */
+@Entity(tableName = "move_sessions")
+data class MoveSessionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    /** ISO date, yyyy-MM-dd */
+    val date: String,
+    /** SQUAT or PUSHUP */
+    val exercise: String,
+    val reps: Int,
+    val minutesEarned: Int,
+    val completedAt: Long,
+)
