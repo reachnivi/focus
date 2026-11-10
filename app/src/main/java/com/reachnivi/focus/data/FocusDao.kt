@@ -103,4 +103,11 @@ interface FocusDao {
 
     @Query("SELECT * FROM daily_steps ORDER BY date")
     fun observeSteps(): Flow<List<DailyStepsEntity>>
+
+    // Photo quests
+    @Insert
+    suspend fun insertPhotoQuest(row: PhotoQuestEntity)
+
+    @Query("SELECT * FROM photo_quests ORDER BY completedAt DESC")
+    fun observePhotoQuests(): Flow<List<PhotoQuestEntity>>
 }

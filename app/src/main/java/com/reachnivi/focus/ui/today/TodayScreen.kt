@@ -48,6 +48,7 @@ import com.reachnivi.focus.core.WeeklyRecap
 import com.reachnivi.focus.ui.components.AppIcon
 import com.reachnivi.focus.ui.connect.ConnectionCard
 import com.reachnivi.focus.ui.garden.GardenCard
+import com.reachnivi.focus.ui.quests.PhotoQuestCard
 import com.reachnivi.focus.ui.walk.WalkCard
 import com.reachnivi.focus.ui.components.BarChart
 import com.reachnivi.focus.ui.components.BlockerStatusPill
@@ -109,6 +110,7 @@ fun TodayScreen(
                             FocusPromptCard(state, onStartFocus)
                             ConnectionCard(onOpenCircle)
                             WalkCard()
+                            PhotoQuestCard()
                             TopAppsCard("Most used today", state.today, state.loading)
                         }
                         Range.WEEK -> {

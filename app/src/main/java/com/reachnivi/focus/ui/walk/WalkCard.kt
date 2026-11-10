@@ -60,7 +60,7 @@ fun WalkCard() {
                     )
                 } else {
                     Text(
-                        "${NumberFormat.getIntegerInstance().format(s.stepsToday)} steps · ${s.minutesLeft} min to spend",
+                        "${NumberFormat.getIntegerInstance().format(s.stepsToday)} steps · ${s.minutesLeft} min earned to spend",
                         style = MaterialTheme.typography.titleSmall,
                     )
                     Text(

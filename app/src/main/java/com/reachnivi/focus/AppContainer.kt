@@ -12,6 +12,7 @@ import com.reachnivi.focus.data.ConnectionsRepository
 import com.reachnivi.focus.data.FocusSessionManager
 import com.reachnivi.focus.data.GardenRepository
 import com.reachnivi.focus.data.PauseLog
+import com.reachnivi.focus.data.PhotoQuestRepository
 import com.reachnivi.focus.data.PolicyRepository
 import com.reachnivi.focus.data.RulesRepository
 import com.reachnivi.focus.data.SettingsRepository
@@ -39,6 +40,7 @@ class AppContainer(context: Context, appScope: CoroutineScope) {
     val recap = RecapNotifier(appContext)
     val steps = StepStore(appContext, db.focusDao())
     val garden = GardenRepository(db.focusDao(), settings, usage, steps.stepsByDay)
+    val photoQuests = PhotoQuestRepository(db.focusDao(), steps)
     val sessions = FocusSessionManager(db.focusDao(), settings, notifier) { FocusWidget.refresh(appContext) }
     val policy = PolicyRepository(rules, settings, appScope)
     val pauseLog = PauseLog(db.focusDao(), appScope)
