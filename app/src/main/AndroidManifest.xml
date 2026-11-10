@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <!-- Lets us list launchable apps without QUERY_ALL_PACKAGES. -->
     <queries>
@@ -68,6 +69,14 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
             android:taskAffinity="com.reachnivi.focus.block"
+            android:theme="@style/Theme.Focus" />
+
+        <activity
+            android:name=".stack.StackBrokenActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.reachnivi.focus.stack"
             android:theme="@style/Theme.Focus" />
 
         <service

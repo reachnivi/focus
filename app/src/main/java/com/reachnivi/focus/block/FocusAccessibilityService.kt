@@ -64,6 +64,8 @@ class FocusAccessibilityService : AccessibilityService() {
                 recheckForeground()
             }
         }
+        // Phone stack: sense orientation and unlocks only while a stack is waiting or running.
+        scope.launch { c.stack.store.active.collect { c.stack.ensureSensing(this@FocusAccessibilityService) } }
         // Connection challenge: measure call time from the audio mode (no call-log permission needed).
         scope.launch {
             while (isActive) {
@@ -79,6 +81,7 @@ class FocusAccessibilityService : AccessibilityService() {
                 recheckForeground()
                 runCatching { c.bedtime.tick() }
                 ensureStepCounting()
+                c.stack.tick()
             }
         }
     }
@@ -109,6 +112,7 @@ class FocusAccessibilityService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        container?.stack?.stopSensing()
         stepListener?.let { getSystemService(SensorManager::class.java)?.unregisterListener(it) }
         stepListener = null
         isConnected = false

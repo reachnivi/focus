@@ -75,6 +75,8 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.glance.appwidget)
     implementation(libs.mlkit.image.labeling)
+    implementation(libs.zxing.core)
+    implementation(libs.play.services.code.scanner)
     implementation(libs.kotlinx.coroutines.android)
 
     debugImplementation(libs.compose.ui.tooling)

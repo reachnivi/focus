@@ -110,4 +110,11 @@ interface FocusDao {
 
     @Query("SELECT * FROM photo_quests ORDER BY completedAt DESC")
     fun observePhotoQuests(): Flow<List<PhotoQuestEntity>>
+
+    // Phone stacks
+    @Insert
+    suspend fun insertStack(row: PhoneStackEntity)
+
+    @Query("SELECT * FROM phone_stacks ORDER BY startedAt DESC")
+    fun observeStacks(): Flow<List<PhoneStackEntity>>
 }

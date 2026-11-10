@@ -198,6 +198,7 @@ private fun SchedulesCard(
     onEdit: (ScheduleRule) -> Unit,
     onToggle: (ScheduleRule, Boolean) -> Unit,
 ) {
+    val use24 = android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current)
     FocusCard {
         SectionHeader("Schedules", action = { AddButton(onAdd) })
         if (schedules.isEmpty()) {
@@ -212,7 +213,7 @@ private fun SchedulesCard(
                 Column(Modifier.weight(1f)) {
                     Text(rule.name.ifBlank { "Schedule" }, style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        "${daysSummary(rule.days)} · ${Format.minuteOfDay(rule.startMinute)}–${Format.minuteOfDay(rule.endMinute)}",
+                        "${daysSummary(rule.days)} · ${Format.timeOfDay(rule.startMinute, use24)}–${Format.timeOfDay(rule.endMinute, use24)}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

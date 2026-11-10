@@ -152,3 +152,18 @@ data class PhotoQuestEntity(
     val label: String,
     val confidence: Float,
 )
+
+/** One phone stack this phone took part in. */
+@Entity(tableName = "phone_stacks")
+data class PhoneStackEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val code: String,
+    val groupName: String,
+    /** HOST or GUEST */
+    val role: String,
+    val startedAt: Long,
+    val minutes: Int,
+    val endedAt: Long,
+    /** COMPLETED or BROKEN */
+    val outcome: String,
+)

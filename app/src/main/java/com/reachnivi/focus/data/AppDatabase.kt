@@ -20,8 +20,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ConnectionEventEntity::class,
         DailyStepsEntity::class,
         PhotoQuestEntity::class,
+        PhoneStackEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -30,8 +31,25 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context, AppDatabase::class.java, "focus.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .build()
+
+        /** v6: phone stacks. */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `phone_stacks` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`code` TEXT NOT NULL, " +
+                        "`groupName` TEXT NOT NULL, " +
+                        "`role` TEXT NOT NULL, " +
+                        "`startedAt` INTEGER NOT NULL, " +
+                        "`minutes` INTEGER NOT NULL, " +
+                        "`endedAt` INTEGER NOT NULL, " +
+                        "`outcome` TEXT NOT NULL)",
+                )
+            }
+        }
 
         /** v5: photo quests (label only, never the image). */
         val MIGRATION_4_5 = object : Migration(4, 5) {
