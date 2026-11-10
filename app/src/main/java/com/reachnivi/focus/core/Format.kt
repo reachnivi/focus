@@ -28,4 +28,13 @@ object Format {
         val m = minute % 60
         return "%02d:%02d".format(h, m)
     }
+
+    /** Minutes since midnight as "10:30 PM" (12-hour, US/Canada) or "22:30" (24-hour), per the device setting. */
+    fun timeOfDay(minute: Int, use24h: Boolean): String {
+        val h = (minute / 60) % 24
+        val m = minute % 60
+        if (use24h) return "%02d:%02d".format(h, m)
+        val h12 = if (h % 12 == 0) 12 else h % 12
+        return "%d:%02d %s".format(h12, m, if (h < 12) "AM" else "PM")
+    }
 }

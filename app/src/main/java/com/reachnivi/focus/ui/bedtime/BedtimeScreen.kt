@@ -56,6 +56,7 @@ fun BedtimeScreen(onBack: () -> Unit) {
     val tick = rememberResumeTick()
     val dndAccess = remember(tick) { Permissions.hasDndAccess(context) }
     var picking by remember { mutableStateOf<Boolean?>(null) } // true = start, false = end
+    val use24 = android.text.format.DateFormat.is24HourFormat(context)
 
     fun save(
         enabled: Boolean = s.bedtimeEnabled,
@@ -88,7 +89,7 @@ fun BedtimeScreen(onBack: () -> Unit) {
                     Column(Modifier.weight(1f)) {
                         Text("Bedtime", style = MaterialTheme.typography.titleMedium)
                         Text(
-                            if (s.bedtimeEnabled) "${Format.minuteOfDay(s.bedtimeStart)} to ${Format.minuteOfDay(s.bedtimeEnd)}" else "Off",
+                            if (s.bedtimeEnabled) "${Format.timeOfDay(s.bedtimeStart, use24)} to ${Format.timeOfDay(s.bedtimeEnd, use24)}" else "Off",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -173,11 +174,12 @@ fun BedtimeScreen(onBack: () -> Unit) {
 
 @Composable
 private fun TimeButton(label: String, minute: Int, modifier: Modifier, onClick: () -> Unit) {
+    val use24 = android.text.format.DateFormat.is24HourFormat(LocalContext.current)
     Column(modifier) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
         OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-            Text(Format.minuteOfDay(minute), style = MaterialTheme.typography.titleMedium)
+            Text(Format.timeOfDay(minute, use24), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

@@ -10,7 +10,7 @@ class PhoneStackTest {
 
     @Test
     fun `invite code round-trips and rejects junk`() {
-        val invite = StackInvite("ab12", 45, "Hostel 3B: dinner & chai")
+        val invite = StackInvite("ab12", 45, "Friday dinner & coffee")
         assertEquals(invite, StackCode.parse(StackCode.encode(invite)))
         assertNull(StackCode.parse("https://example.com"))
         assertNull(StackCode.parse("focus-stack:2:ab12:45:x"))

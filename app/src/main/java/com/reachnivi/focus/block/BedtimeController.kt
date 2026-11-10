@@ -59,7 +59,7 @@ class BedtimeController(private val context: Context, private val settings: Sett
             val notifiedOn = s.windDownNotifiedOn?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
             if (Bedtime.windDownDue(rule, now, s.windDownMinutes, notifiedOn)) {
                 val start = Bedtime.nextStart(rule, now) ?: return
-                notifyWindDown(s.windDownMinutes, Format.minuteOfDay(rule.startMinute))
+                notifyWindDown(s.windDownMinutes, Format.timeOfDay(rule.startMinute, android.text.format.DateFormat.is24HourFormat(context)))
                 settings.setWindDownNotifiedOn(start.toLocalDate().toString())
             }
         }

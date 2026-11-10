@@ -197,6 +197,7 @@ private fun plural(n: Int, word: String) = if (n == 1) "1 $word" else "$n ${word
 private fun BedtimeCard(onClick: () -> Unit) {
     val settings by LocalAppContainer.current.settings.settings.collectAsStateWithLifecycle(initialValue = null)
     val s = settings ?: return
+    val use24 = android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current)
     FocusCard(onClick = onClick, contentPadding = 16.dp) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Rounded.Bedtime, null, tint = MaterialTheme.colorScheme.primary)
@@ -205,7 +206,7 @@ private fun BedtimeCard(onClick: () -> Unit) {
                 Text("Bedtime", style = MaterialTheme.typography.titleSmall)
                 Text(
                     if (s.bedtimeEnabled) {
-                        "Every night ${Format.minuteOfDay(s.bedtimeStart)} to ${Format.minuteOfDay(s.bedtimeEnd)}"
+                        "Every night ${Format.timeOfDay(s.bedtimeStart, use24)} to ${Format.timeOfDay(s.bedtimeEnd, use24)}"
                     } else {
                         "Let your phone rest at night too"
                     },
@@ -231,7 +232,7 @@ private fun StackCard(onClick: () -> Unit) {
                     when (active?.phase) {
                         is com.reachnivi.focus.core.StackPhase.Running -> "In progress. Don't touch it!"
                         is com.reachnivi.focus.core.StackPhase.Waiting -> "Waiting for phones to go face-down"
-                        else -> "Phones down with friends. First to pick up buys the chai."
+                        else -> "Phones down with friends. First to pick up buys the coffee."
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,

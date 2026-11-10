@@ -53,7 +53,7 @@ class StackBrokenActivity : ComponentActivity() {
                     Spacer(Modifier.height(16.dp))
                     Text("You broke the stack!", style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(8.dp))
-                    Text("Chai's on you.", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.tertiary)
+                    Text("Coffee's on you.", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.tertiary)
                     Spacer(Modifier.height(16.dp))
                     Text(
                         buildString {

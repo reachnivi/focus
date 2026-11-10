@@ -47,7 +47,7 @@ Open the project in Android Studio (Ladybug or newer) and run the `app` configur
 
 ## Roadmap
 
-Focus's niche is **"earn it in real life"**: real-world actions (talking to people, moving, studying) earn screen time. The launch audience is Indian students and exam aspirants.
+Focus's niche is **"earn it in real life"**: real-world actions (calling people you care about, walking, getting outside, time with friends) earn screen time. The launch audience is young adults in the **US, UK, Canada and Australia**; Android first, then iOS.
 
 1. ✅ **Stage 1: Personal use.** Blocking (apps, sites, schedules, limits), focus sessions, screen-time dashboard, blocker health alerts
 2. ✅ **Stage 2: Minimalism**
@@ -60,10 +60,10 @@ Focus's niche is **"earn it in real life"**: real-world actions (talking to peop
    - ✅ 3b Walk quests: earn minutes with steps
    - ✅ 3c AI photo quests: sky, a tree, your study desk, a book page (checked on the phone)
    - 3d Move to unlock: pushups and squats counted by the camera
-   - ✅ 3e Phone stack: a group session with friends nearby; first to unlock buys the chai
-   - 3f Study-quiz unlock: NEET/JEE/UPSC questions earn minutes
-   - 3g QR/NFC unlock and friend-code lock
-   - ✅ 3h Focus garden: XP from every challenge grows a garden
-4. **Stage 4: Competitive essentials.** Reels/Shorts blocking, hardened strict mode, notification muting, presets and Wi-Fi triggers, open-count limits, keyword/VPN filtering, Hindi
-5. **Stage 5: Social and AI.** Backend and accounts, friend leagues, parent/mentor mode, AI coach and insights (Claude, server-side), AI conversation starters
-6. **Stage 6: Launch for Indian students.** Rupee pricing (Free, Pro, Pro + AI, institutes), aspirant onboarding, Play declarations, privacy policy, release signing, store listing, campus ambassadors
+   - ✅ 3e Phone stack: a group session with friends nearby; first to unlock buys the coffee
+   - 3f QR/NFC unlock and friend-code lock
+   - ✅ 3g Focus garden: XP from every challenge grows a garden
+4. **Stage 4: Competitive essentials.** Reels/Shorts blocking, hardened strict mode, notification muting, presets and Wi-Fi triggers, open-count limits, keyword/VPN filtering
+5. **Stage 5: Social and AI.** Backend and accounts, friend leagues, accountability partner, AI coach and insights (Claude, server-side), AI conversation starters
+6. **Stage 6: Launch on Android in the US, UK, Canada and Australia.** Pricing in USD/GBP (Free, Pro, Pro + AI, Teams/Campus), onboarding, Play declarations, privacy policy, release signing, store listing, launch campaign
+7. **Stage 7: iOS app.** SwiftUI with Apple's Screen Time APIs (FamilyControls, ManagedSettings, DeviceActivity); about 87% of US teens use iPhones, so this unlocks the US Gen Z market

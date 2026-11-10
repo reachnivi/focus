@@ -67,7 +67,7 @@ private fun qrBitmap(text: String, size: Int = 640): Bitmap {
     return bmp
 }
 
-/** Phone stack: friends put phones face-down together; the first one picked up buys the chai. */
+/** Phone stack: friends put phones face-down together; the first one picked up buys the coffee. */
 @Composable
 fun StackScreen(onBack: () -> Unit) {
     val container = LocalAppContainer.current
@@ -84,7 +84,7 @@ fun StackScreen(onBack: () -> Unit) {
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back") }
             Text("Phone stack", style = MaterialTheme.typography.headlineLarge)
             Text(
-                "Phones face-down, together, for a while. The first one picked up buys the chai.",
+                "Phones face-down, together, for a while. The first one picked up buys the coffee.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -102,7 +102,7 @@ fun StackScreen(onBack: () -> Unit) {
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 StatTile("Stacks finished", "${history.count { it.outcome == "COMPLETED" }}", Modifier.weight(1f))
-                StatTile("Chai bought", "${history.count { it.outcome == "BROKEN" }}", Modifier.weight(1f))
+                StatTile("Coffees owed", "${history.count { it.outcome == "BROKEN" }}", Modifier.weight(1f))
             }
         }
         if (!FocusAccessibilityService.isConnected) {
@@ -139,7 +139,7 @@ private fun Setup() {
             value = name,
             onValueChange = { name = it.take(40) },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Hostel 3B dinner") },
+            placeholder = { Text("Friday dinner") },
             label = { Text("Name (optional)") },
             singleLine = true,
         )
@@ -220,7 +220,7 @@ private fun Running(stack: ActiveStack, phase: StackPhase.Running) {
             Spacer(Modifier.height(8.dp))
             Text("Don't touch it! Unlocking breaks the stack.", style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
             Spacer(Modifier.height(8.dp))
-            TextButton(onClick = { controller.cancel() }) { Text("Give up (chai's on you)") }
+            TextButton(onClick = { controller.cancel() }) { Text("Give up (coffee's on you)") }
         }
     }
 }
@@ -231,7 +231,7 @@ private fun Finished(stack: ActiveStack, completed: Boolean) {
     FocusCard(color = if (completed) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.tertiaryContainer) {
         Text(if (completed) "Stack complete" else "You broke the stack", style = MaterialTheme.typography.titleLarge)
         Text(
-            if (completed) "${stack.invite.minutes} minutes together. +25 garden XP." else "Chai's on you this time.",
+            if (completed) "${stack.invite.minutes} minutes together. +25 garden XP." else "Coffee's on you this time.",
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(Modifier.height(10.dp))

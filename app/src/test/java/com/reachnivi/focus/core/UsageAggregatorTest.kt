@@ -91,4 +91,13 @@ class UsageAggregatorTest {
         assertEquals("2h 14m", Format.duration(134 * min))
         assertEquals("24:59", Format.clock(24 * min + 59_000))
     }
+
+    @Test
+    fun `time of day follows the 12 or 24 hour setting`() {
+        assertEquals("10:30 PM", Format.timeOfDay(22 * 60 + 30, use24h = false))
+        assertEquals("12:05 AM", Format.timeOfDay(5, use24h = false))
+        assertEquals("12:00 PM", Format.timeOfDay(12 * 60, use24h = false))
+        assertEquals("6:30 AM", Format.timeOfDay(6 * 60 + 30, use24h = false))
+        assertEquals("22:30", Format.timeOfDay(22 * 60 + 30, use24h = true))
+    }
 }

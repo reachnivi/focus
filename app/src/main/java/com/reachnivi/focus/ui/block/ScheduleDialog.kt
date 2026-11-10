@@ -117,7 +117,7 @@ private fun TimeField(label: String, minute: Int, modifier: Modifier, onClick: (
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.height(4.dp))
         OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-            Text(Format.minuteOfDay(minute), style = MaterialTheme.typography.titleMedium)
+            Text(Format.timeOfDay(minute, android.text.format.DateFormat.is24HourFormat(LocalContext.current)), style = MaterialTheme.typography.titleMedium)
         }
     }
 }
